@@ -35,14 +35,14 @@ export function SetCompleteModal({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="rounded-2xl border-border">
         <DialogHeader className="items-center text-center">
-          <div className="flex size-16 items-center justify-center rounded-full bg-primary text-primary-foreground">
+          <div className="flex size-16 items-center justify-center rounded-full bg-primary text-primary-foreground animate-glow-pulse">
             <PartyPopper className="size-8" />
           </div>
           <DialogTitle className="font-heading text-2xl uppercase tracking-tight">
-            Set Complete!
+            Coaster Set Complete!
           </DialogTitle>
           <DialogDescription className="text-sm text-muted-foreground">
-            You&apos;ve collected all five languages for {itemName}.
+            You&apos;ve collected all five language coasters for {itemName}.
           </DialogDescription>
         </DialogHeader>
         <div className="rounded-xl border border-dashed border-primary bg-primary/5 p-4 text-center">

@@ -15,6 +15,7 @@
   --color-weber-red: var(--weber-red);
   --color-weber-white: var(--weber-white);
   --color-weber-border: var(--weber-border);
+  --color-weber-ember: var(--weber-ember);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -60,6 +61,7 @@
   --weber-red: #d8291d;
   --weber-white: #ffffff;
   --weber-border: #e0ded6;
+  --weber-ember: #f2994a;
 
   --background: var(--weber-cream);
   --foreground: var(--weber-black);
@@ -144,5 +146,101 @@
   h3,
   h4 {
     @apply font-heading uppercase tracking-tight;
+  }
+}
+
+/* ---------------------------------------------------------------------- */
+/* Motion — coaster reveal, ember/celebration, countdown pulse            */
+/* ---------------------------------------------------------------------- */
+
+@keyframes coaster-drop {
+  0% {
+    transform: scale(0.45) translateY(-30px);
+    opacity: 0;
+  }
+  55% {
+    transform: scale(1.06) translateY(2px);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes glow-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(216, 41, 29, 0.35);
+  }
+  50% {
+    box-shadow: 0 0 0 16px rgba(216, 41, 29, 0);
+  }
+}
+
+@keyframes ember-rise {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 0.9;
+  }
+  100% {
+    transform: translateY(-140px) scale(0.3);
+    opacity: 0;
+  }
+}
+
+@keyframes tick-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
+
+@keyframes ember-sweep {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 200% 50%;
+  }
+}
+
+.animate-coaster-drop {
+  animation: coaster-drop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.animate-glow-pulse {
+  animation: glow-pulse 2s ease-in-out infinite;
+}
+
+.animate-ember-rise {
+  animation: ember-rise 2.4s ease-out infinite;
+}
+
+.animate-tick-pulse {
+  animation: tick-pulse 2s ease-in-out infinite;
+}
+
+.progress-ember-fill {
+  background-image: linear-gradient(
+    90deg,
+    var(--weber-red),
+    var(--weber-ember),
+    var(--weber-red)
+  );
+  background-size: 200% 100%;
+  animation: ember-sweep 2.4s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-coaster-drop,
+  .animate-glow-pulse,
+  .animate-ember-rise,
+  .animate-tick-pulse,
+  .progress-ember-fill {
+    animation: none !important;
   }
 }

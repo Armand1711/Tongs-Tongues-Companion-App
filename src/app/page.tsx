@@ -1,8 +1,14 @@
 import Link from "next/link";
-import { ScanLine, LayoutGrid } from "lucide-react";
+import { ScanLine, ArrowRight } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
-import { getAllCards, getCollectedCardIds } from "@/lib/supabase/queries";
-import { TOTAL_CARDS } from "@/lib/constants";
+import {
+  getAllCards,
+  getCollectedCardIds,
+  getActiveChallenge,
+  summarizeByItem,
+} from "@/lib/supabase/queries";
+import { ITEM_ORDER, TOTAL_CARDS } from "@/lib/constants";
+import { COASTER_STYLES } from "@/lib/coasters";
 import { Button } from "@/components/ui/button";
 
 export default async function HomePage() {
@@ -11,71 +17,114 @@ export default async function HomePage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  let collectedCount = 0;
-  if (user) {
-    const [cards, collectedIds] = await Promise.all([
-      getAllCards(supabase),
-      getCollectedCardIds(supabase, user.id),
-    ]);
-    collectedCount = cards.filter((card) => collectedIds.has(card.id)).length;
-  }
+  const [cards, collectedIds, challenge] = await Promise.all([
+    getAllCards(supabase),
+    user ? getCollectedCardIds(supabase, user.id) : Promise.resolve(new Set<string>()),
+    getActiveChallenge(supabase),
+  ]);
 
+  const progressBySlug = new Map(
+    summarizeByItem(cards, collectedIds).map((p) => [p.itemSlug, p])
+  );
+  const collectedCount = collectedIds.size;
   const progressPct = Math.round((collectedCount / TOTAL_CARDS) * 100);
 
   return (
-    <div className="mx-auto flex max-w-md flex-col gap-8 px-4 pt-10">
-      <header className="space-y-1">
-        <p className="text-sm font-medium text-primary">Weber South Africa</p>
-        <h1 className="text-4xl font-heading font-semibold uppercase tracking-tight text-foreground">
-          Tongs &amp; Tongues
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          Scan the QR code on every Weber braai essential to collect its card
-          and learn its name in five South African languages.
-        </p>
+    <div className="mx-auto flex max-w-md flex-col gap-6 px-4 pt-8">
+      <header className="flex items-baseline justify-between">
+        <div>
+          <h1 className="font-heading text-2xl uppercase tracking-tight text-foreground">
+            Tongs &amp; Tongues
+          </h1>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            Weber South Africa
+          </p>
+        </div>
+        <div className="flex size-9 items-center justify-center rounded-full bg-weber-black font-heading text-[13px] font-semibold text-weber-cream">
+          TT
+        </div>
       </header>
 
-      <section className="rounded-2xl border border-border bg-card p-6 shadow-sm">
-        <div className="flex items-baseline justify-between">
-          <span className="font-heading text-sm uppercase tracking-wide text-muted-foreground">
-            Your Progress
+      <section className="relative overflow-hidden rounded-[20px] bg-weber-black p-6 text-weber-cream">
+        <p className="font-heading text-xs uppercase tracking-[0.15em] text-weber-cream/60">
+          Your Coasters
+        </p>
+        <div className="mt-1.5 mb-4 flex items-baseline gap-2">
+          <span className="font-heading text-4xl font-bold">
+            {collectedCount}
           </span>
-          <span className="font-heading text-lg font-semibold">
-            {collectedCount}/{TOTAL_CARDS}
+          <span className="text-sm text-weber-cream/60">
+            / {TOTAL_CARDS} unlocked
           </span>
         </div>
-        <div className="mt-3 h-3 w-full overflow-hidden rounded-full bg-muted">
+        <div className="h-2 w-full overflow-hidden rounded-full bg-white/10">
           <div
-            className="h-full rounded-full bg-primary transition-all"
+            className="progress-ember-fill h-full rounded-full transition-[width] duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
             style={{ width: `${progressPct}%` }}
           />
         </div>
-        <p className="mt-3 text-xs text-muted-foreground">
-          Collect all 5 language cards for an item to unlock its reward.
-        </p>
       </section>
 
-      <section className="flex flex-col gap-3">
-        <Button
-          render={<Link href="/scan" />}
-          nativeButton={false}
-          size="lg"
-          className="h-14 rounded-2xl text-base font-heading uppercase tracking-wide"
-        >
-          <ScanLine className="size-5" />
-          Scan a Card
-        </Button>
-        <Button
-          render={<Link href="/collection" />}
-          nativeButton={false}
-          variant="outline"
-          size="lg"
-          className="h-14 rounded-2xl border-border bg-transparent text-base font-heading uppercase tracking-wide"
-        >
-          <LayoutGrid className="size-5" />
-          View Collection
-        </Button>
+      <Button
+        render={<Link href="/scan" />}
+        nativeButton={false}
+        size="lg"
+        className="h-14 rounded-2xl text-base font-heading uppercase tracking-wide active:scale-[0.97]"
+      >
+        <ScanLine className="size-5" />
+        Scan a Coaster
+      </Button>
+
+      <section>
+        <p className="mb-3 font-heading text-[13px] uppercase tracking-wide text-foreground">
+          Your Rack
+        </p>
+        <div className="grid grid-cols-2 gap-3">
+          {ITEM_ORDER.map((slug) => {
+            const progress = progressBySlug.get(slug);
+            const unlockedCount = progress?.collected ?? 0;
+            const style = COASTER_STYLES[slug];
+
+            return (
+              <Link
+                key={slug}
+                href={`/collection/${slug}`}
+                className="rounded-2xl border border-border bg-card p-3.5 shadow-sm transition-transform active:scale-[0.97]"
+              >
+                <div
+                  className="flex size-10 items-center justify-center rounded-full font-heading text-[13px] font-semibold text-white"
+                  style={{ background: style.badgeBg }}
+                >
+                  {style.mono}
+                </div>
+                <p className="mt-2.5 font-heading text-[13px] font-semibold uppercase tracking-wide text-foreground">
+                  {progress?.itemName ?? slug}
+                </p>
+                <p className="mt-0.5 text-[11px] text-muted-foreground">
+                  {unlockedCount}/5 languages
+                </p>
+              </Link>
+            );
+          })}
+        </div>
       </section>
+
+      {challenge && (
+        <Link
+          href="/feed"
+          className="flex items-center justify-between gap-3 rounded-2xl bg-gradient-to-br from-primary to-[#8a1a12] p-4 text-primary-foreground shadow-sm transition-transform active:scale-[0.98]"
+        >
+          <div>
+            <p className="text-[10px] uppercase tracking-[0.15em] text-primary-foreground/70">
+              This Month&apos;s Challenge
+            </p>
+            <p className="mt-1 font-heading text-sm font-semibold">
+              {challenge.theme}
+            </p>
+          </div>
+          <ArrowRight className="size-5 shrink-0" />
+        </Link>
+      )}
     </div>
   );
 }

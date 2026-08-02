@@ -1,21 +1,9 @@
 import Link from "next/link";
-import { Flame, CookingPot, Utensils, Shirt, FlameKindling } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
-import {
-  getAllCards,
-  getCollectedCardIds,
-  summarizeByItem,
-} from "@/lib/supabase/queries";
-import { ITEM_ORDER, type ItemSlug } from "@/lib/constants";
+import { getAllCards, getCollectedCardIds } from "@/lib/supabase/queries";
+import { ITEM_ORDER, TOTAL_CARDS, type ItemSlug } from "@/lib/constants";
+import { COASTER_STYLES } from "@/lib/coasters";
 import { cn } from "@/lib/utils";
-
-const ITEM_ICONS: Record<ItemSlug, typeof Flame> = {
-  charcoal: Flame,
-  kettle: CookingPot,
-  tongs: Utensils,
-  apron: Shirt,
-  "chimney-starter": FlameKindling,
-};
 
 export default async function CollectionPage() {
   const supabase = await createClient();
@@ -28,56 +16,68 @@ export default async function CollectionPage() {
     ? await getCollectedCardIds(supabase, user.id)
     : new Set<string>();
 
-  const progressBySlug = new Map(
-    summarizeByItem(cards, collectedIds).map((p) => [p.itemSlug, p])
-  );
+  const collectedCount = collectedIds.size;
 
   return (
     <div className="mx-auto flex max-w-md flex-col gap-6 px-4 pt-10">
       <header className="space-y-1">
-        <p className="text-sm font-medium text-primary">Your Collection</p>
-        <h1 className="font-heading text-3xl uppercase tracking-tight">
-          Braai Essentials
+        <h1 className="font-heading text-xl font-bold uppercase tracking-tight">
+          Coaster Rack
         </h1>
-        <p className="text-sm text-muted-foreground">
-          Tap an item to see all five language cards.
+        <p className="text-[13px] text-muted-foreground">
+          {collectedCount} of {TOTAL_CARDS} coasters collected
         </p>
       </header>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="flex flex-col gap-5">
         {ITEM_ORDER.map((slug) => {
-          const progress = progressBySlug.get(slug);
-          const collected = progress?.collected ?? 0;
-          const total = progress?.total ?? 5;
-          const isComplete = collected === total;
-          const Icon = ITEM_ICONS[slug];
+          const itemCards = cards
+            .filter((card) => card.item_slug === slug)
+            .sort((a, b) => a.language_code.localeCompare(b.language_code));
+          const itemName = itemCards[0]?.item_name ?? slug;
+          const style = COASTER_STYLES[slug as ItemSlug];
 
           return (
-            <Link
-              key={slug}
-              href={`/collection/${slug}`}
-              className={cn(
-                "flex flex-col items-center gap-2 rounded-2xl border bg-card p-5 text-center shadow-sm transition-transform active:scale-95",
-                isComplete ? "border-primary" : "border-border"
-              )}
-            >
-              <div
-                className={cn(
-                  "flex size-14 items-center justify-center rounded-full",
-                  isComplete
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-muted text-muted-foreground"
-                )}
-              >
-                <Icon className="size-7" />
+            <div key={slug}>
+              <div className="mb-2.5 flex items-center justify-between">
+                <p className="font-heading text-[13px] font-semibold uppercase tracking-wide text-foreground">
+                  {itemName}
+                </p>
+                <Link
+                  href={`/collection/${slug}`}
+                  className="text-[11px] font-semibold text-primary"
+                >
+                  View →
+                </Link>
               </div>
-              <p className="font-heading text-sm uppercase tracking-wide">
-                {progress?.itemName ?? slug}
-              </p>
-              <p className="text-xs font-medium text-muted-foreground">
-                {collected}/{total} languages
-              </p>
-            </Link>
+              <div className="flex gap-2.5">
+                {itemCards.map((card) => {
+                  const unlocked = collectedIds.has(card.id);
+                  return (
+                    <Link
+                      key={card.id}
+                      href={`/collection/${slug}?lang=${card.language_code}`}
+                      aria-label={`${itemName} — ${card.language}`}
+                      className={cn(
+                        "flex size-[52px] shrink-0 items-center justify-center rounded-full transition-transform active:scale-90",
+                        !unlocked && "border-2 border-dashed border-border"
+                      )}
+                      style={
+                        unlocked
+                          ? { background: style.badgeBg }
+                          : { background: "var(--weber-cream)" }
+                      }
+                    >
+                      {unlocked && (
+                        <span className="font-heading text-[9px] tracking-wide text-weber-cream">
+                          {card.language_code}
+                        </span>
+                      )}
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
           );
         })}
       </div>

@@ -160,6 +160,148 @@ create policy "authenticated users can upload braai photos"
 -- all isiZulu, isiXhosa, Afrikaans, Sesotho and Setswana copy before this goes
 -- anywhere near production — several of these are simplified/approximate.
 
+-- ============================================================================
+-- FEATURE 3 — MONTHLY BRAAI CHALLENGE
+-- ============================================================================
+-- One challenge is "active" at a time. Entries are ordinary `posts` rows tied
+-- to that challenge via challenge_id. When a challenge's window closes, the
+-- top-voted entry's poster gets a generated voucher code that only they can
+-- read (RLS-gated). There is no cron/scheduler here — closing happens lazily
+-- the next time anyone loads the challenge (see close_challenge_if_due()) —
+-- and seeding the *next* month's theme is a manual admin task, same as the
+-- retailer list in src/lib/constants.ts.
+
+create table if not exists public.challenges (
+  id uuid primary key default gen_random_uuid(),
+  theme text not null,
+  starts_at timestamptz not null default now(),
+  ends_at timestamptz not null,
+  status text not null default 'active' check (status in ('active', 'closed')),
+  created_at timestamptz not null default now()
+);
+
+alter table public.posts add column if not exists challenge_id uuid references public.challenges (id);
+alter table public.posts add column if not exists display_name text;
+
+-- Re-declared now that challenge_id/display_name exist — same view as Feature 2,
+-- extended so the leaderboard query can filter/label by them in one pass.
+-- New columns are appended at the end: `create or replace view` requires the
+-- existing columns to keep their original names/order (Postgres error 42P16
+-- otherwise), so display_name/challenge_id can't be inserted before created_at.
+create or replace view public.posts_with_votes as
+select
+  p.id,
+  p.user_id,
+  p.image_url,
+  p.caption,
+  p.created_at,
+  count(v.id) as vote_count,
+  p.display_name,
+  p.challenge_id
+from public.posts p
+left join public.votes v on v.post_id = p.id
+group by p.id;
+
+-- Only one challenge may be active at a time — lets "current challenge"
+-- queries be a plain `where status = 'active'` with no extra ordering.
+create unique index if not exists challenges_one_active_idx
+  on public.challenges ((true)) where status = 'active';
+
+-- One entry per user per challenge — resubmitting updates the existing post
+-- (and keeps its accumulated votes) instead of splitting votes across two rows.
+create unique index if not exists posts_challenge_user_idx
+  on public.posts (challenge_id, user_id) where challenge_id is not null;
+
+create table if not exists public.voucher_codes (
+  id uuid primary key default gen_random_uuid(),
+  challenge_id uuid not null references public.challenges (id) on delete cascade,
+  post_id uuid not null references public.posts (id) on delete cascade,
+  user_id uuid not null references auth.users (id) on delete cascade,
+  code text not null unique,
+  created_at timestamptz not null default now(),
+  unique (challenge_id)
+);
+
+alter table public.challenges enable row level security;
+alter table public.voucher_codes enable row level security;
+
+drop policy if exists "challenges are readable by everyone" on public.challenges;
+create policy "challenges are readable by everyone"
+  on public.challenges for select
+  using (true);
+
+-- Voucher codes are only visible to the winner — everyone else just sees
+-- them referenced (masked) via the hall_of_fame view below.
+drop policy if exists "users can read own vouchers" on public.voucher_codes;
+create policy "users can read own vouchers"
+  on public.voucher_codes for select
+  using (auth.uid() = user_id);
+
+-- Closes the active challenge once its window has elapsed: picks the
+-- top-voted entry (ties broken by earliest submission), mints that user a
+-- unique voucher code, and marks the challenge closed. SECURITY DEFINER so
+-- it can write voucher_codes/challenges regardless of the caller's RLS —
+-- safe to expose to any authenticated (incl. anonymous) caller because it
+-- only ever acts on a challenge whose ends_at has already passed.
+create or replace function public.close_challenge_if_due()
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  due_challenge record;
+  winning_post record;
+  new_code text;
+begin
+  select * into due_challenge
+  from public.challenges
+  where status = 'active' and ends_at <= now()
+  limit 1
+  for update skip locked;
+
+  if not found then
+    return;
+  end if;
+
+  select p.id, p.user_id into winning_post
+  from public.posts p
+  left join public.votes v on v.post_id = p.id
+  where p.challenge_id = due_challenge.id
+  group by p.id, p.user_id
+  order by count(v.id) desc, p.created_at asc
+  limit 1;
+
+  if found then
+    new_code := 'WEBER-BRAAI-' || upper(substr(md5(random()::text || clock_timestamp()::text), 1, 4));
+    insert into public.voucher_codes (challenge_id, post_id, user_id, code)
+    values (due_challenge.id, winning_post.id, winning_post.user_id, new_code)
+    on conflict (challenge_id) do nothing;
+  end if;
+
+  update public.challenges set status = 'closed' where id = due_challenge.id;
+end;
+$$;
+
+grant execute on function public.close_challenge_if_due() to authenticated;
+
+-- Hall of fame — one row per closed challenge that produced a winner, with
+-- the winning post's content but no voucher code (that stays RLS-private).
+create or replace view public.hall_of_fame as
+select
+  c.id as challenge_id,
+  c.theme,
+  c.ends_at,
+  p.id as post_id,
+  p.image_url,
+  p.caption,
+  p.display_name,
+  vc.created_at as won_at
+from public.voucher_codes vc
+join public.challenges c on c.id = vc.challenge_id
+join public.posts p on p.id = vc.post_id
+order by c.ends_at desc;
+
 insert into public.cards (id, item_name, item_slug, language, language_code, word, phonetic) values
   ('CHR-ZU', 'Charcoal', 'charcoal', 'Zulu', 'ZU', 'Amalahle', 'ah-mah-DLAH-shleh'),
   ('CHR-XH', 'Charcoal', 'charcoal', 'Xhosa', 'XH', 'Amalahle', 'ah-mah-HLAH-hleh'),
@@ -197,3 +339,13 @@ on conflict (id) do update set
   language_code = excluded.language_code,
   word = excluded.word,
   phonetic = excluded.phonetic;
+
+-- Seed an initial month-long challenge if none is active yet. Re-running this
+-- script won't create a second one — the partial unique index only allows
+-- one 'active' row, and this insert is skipped once that row exists.
+insert into public.challenges (theme, starts_at, ends_at)
+select
+  'Post your braai with your Kettle coaster in the shot',
+  date_trunc('month', now()),
+  (date_trunc('month', now()) + interval '1 month' - interval '1 second')
+where not exists (select 1 from public.challenges where status = 'active');

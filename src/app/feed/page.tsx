@@ -1,75 +1,100 @@
 import Link from "next/link";
-import { Plus, Flame } from "lucide-react";
+import { Flame } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
-import { getFeedPosts, FEED_WINDOWS, type FeedWindow } from "@/lib/supabase/queries";
-import { FeedTabs } from "@/components/feed-tabs";
-import { PostCard } from "@/components/post-card";
+import {
+  closeChallengeIfDue,
+  getActiveChallenge,
+  getLeaderboard,
+  getMyLatestVoucher,
+} from "@/lib/supabase/queries";
+import { ChallengeCountdown } from "@/components/challenge-countdown";
+import { LeaderboardRow } from "@/components/leaderboard-row";
+import { WinnerBanner } from "@/components/winner-banner";
 import { Button } from "@/components/ui/button";
 
-function parseWindow(value: string | undefined): FeedWindow {
-  return (FEED_WINDOWS as readonly string[]).includes(value ?? "")
-    ? (value as FeedWindow)
-    : "today";
-}
-
-export default async function FeedPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ window?: string }>;
-}) {
-  const { window: windowParam } = await searchParams;
-  const window = parseWindow(windowParam);
-
+export default async function FeedPage() {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const posts = await getFeedPosts(supabase, window, user?.id ?? null);
+  await closeChallengeIfDue(supabase);
+
+  const challenge = await getActiveChallenge(supabase);
+  const [leaderboard, voucher] = await Promise.all([
+    challenge ? getLeaderboard(supabase, challenge.id, user?.id ?? null) : Promise.resolve([]),
+    user ? getMyLatestVoucher(supabase, user.id) : Promise.resolve(null),
+  ]);
+
+  const myEntry = user
+    ? leaderboard.find((entry) => entry.user_id === user.id)
+    : undefined;
 
   return (
-    <div className="mx-auto flex max-w-md flex-col gap-6 px-4 pt-10">
-      <header className="flex items-start justify-between gap-3">
-        <div className="space-y-1">
-          <p className="text-sm font-medium text-primary">Braai Feed</p>
-          <h1 className="font-heading text-3xl uppercase tracking-tight">
-            Share the Fire
-          </h1>
-        </div>
-        <Button
-          render={<Link href="/feed/new" />}
-          nativeButton={false}
-          size="icon-lg"
-          className="rounded-xl"
-          aria-label="New post"
-        >
-          <Plus className="size-5" />
-        </Button>
-      </header>
-
-      <FeedTabs active={window} />
-
-      {posts.length === 0 ? (
-        <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-border p-10 text-center">
-          <Flame className="size-8 text-muted-foreground" />
-          <p className="text-sm text-muted-foreground">
-            No braai posts yet for this period. Be the first to share yours.
+    <div className="mx-auto flex max-w-md flex-col">
+      {challenge ? (
+        <div className="bg-gradient-to-br from-[#1a1a1a] to-weber-black px-5 py-6 text-weber-cream">
+          <p className="mb-2 text-[10px] uppercase tracking-[0.15em] text-[#e8925f]">
+            This Month&apos;s Challenge
           </p>
-          <Button
-            render={<Link href="/feed/new" />}
-            nativeButton={false}
-            className="rounded-xl"
-          >
-            Post Your Braai
-          </Button>
+          <p className="mb-4 font-heading text-lg font-bold leading-snug">
+            {challenge.theme}
+          </p>
+          <div className="flex items-center gap-2">
+            <ChallengeCountdown endsAt={challenge.ends_at} />
+            <Button
+              render={<Link href="/feed/new" />}
+              nativeButton={false}
+              size="sm"
+              className="ml-auto rounded-xl font-heading text-xs uppercase tracking-wide"
+            >
+              Enter
+            </Button>
+          </div>
         </div>
       ) : (
-        <div className="flex flex-col gap-4">
-          {posts.map((post) => (
-            <PostCard key={post.id} post={post} userId={user?.id ?? null} />
-          ))}
+        <div className="bg-weber-black px-5 py-8 text-center text-weber-cream">
+          <p className="font-heading text-sm uppercase tracking-wide">
+            No active challenge right now
+          </p>
+          <p className="mt-1 text-xs text-weber-cream/60">
+            Check back soon for next month&apos;s theme.
+          </p>
         </div>
       )}
+
+      {voucher && <WinnerBanner code={voucher.code} />}
+
+      {myEntry && (
+        <div className="sticky top-0 z-[5] flex items-center justify-between border-b border-border bg-background px-5 py-2.5 text-xs">
+          <span className="text-muted-foreground">Your entry</span>
+          <span className="font-semibold text-foreground">
+            #{myEntry.rank} · {myEntry.vote_count} 🔥
+          </span>
+        </div>
+      )}
+
+      <div className="px-5 pt-4 pb-2">
+        {leaderboard.length === 0 ? (
+          <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-border p-10 text-center">
+            <Flame className="size-8 text-muted-foreground" />
+            <p className="text-sm text-muted-foreground">
+              No entries yet — be the first to enter this month&apos;s challenge.
+            </p>
+          </div>
+        ) : (
+          leaderboard.map((entry) => (
+            <LeaderboardRow key={entry.id} entry={entry} userId={user?.id ?? null} />
+          ))
+        )}
+      </div>
+
+      <Link
+        href="/hall-of-fame"
+        className="mx-5 mt-2 mb-6 text-center text-xs font-semibold text-primary"
+      >
+        Hall of Fame →
+      </Link>
     </div>
   );
 }

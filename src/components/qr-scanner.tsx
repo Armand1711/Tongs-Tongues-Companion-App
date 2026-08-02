@@ -2,10 +2,12 @@
 
 import { useEffect, useId, useRef, useState } from "react";
 import { toast } from "sonner";
-import { CameraOff, CheckCircle2, RotateCcw } from "lucide-react";
+import { CameraOff, RotateCcw } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { collectCard, getCardById } from "@/lib/supabase/queries";
 import { Button } from "@/components/ui/button";
+import { COASTER_STYLES } from "@/lib/coasters";
+import type { ItemSlug } from "@/lib/constants";
 import type { Card as CardData } from "@/lib/database.types";
 
 type ScanState =
@@ -78,7 +80,7 @@ export function QrScanner() {
 
     const card = await getCardById(supabase, code);
     if (!card) {
-      toast.error(`"${code}" isn't a Tongs & Tongues card.`);
+      toast.error(`"${code}" isn't a Tongs & Tongues coaster.`);
       resumeScanning();
       return;
     }
@@ -105,10 +107,28 @@ export function QrScanner() {
     scanner.resume();
   }
 
+  const revealStyle =
+    state.status === "result"
+      ? COASTER_STYLES[state.card.item_slug as ItemSlug]
+      : null;
+
   return (
     <div className="flex flex-col items-center gap-4">
-      <div className="relative w-full max-w-sm overflow-hidden rounded-2xl border border-border bg-black">
-        <div id={elementId} ref={containerRef} className="w-full" />
+      <div className="relative aspect-square w-full max-w-sm overflow-hidden rounded-[24px] border border-border bg-black">
+        <div id={elementId} ref={containerRef} className="size-full [&_video]:size-full [&_video]:object-cover" />
+
+        {state.status === "scanning" && (
+          <svg
+            viewBox="0 0 120 120"
+            className="pointer-events-none absolute inset-0 m-auto size-28 opacity-80"
+            aria-hidden
+          >
+            <path d="M6 30V12a6 6 0 0 1 6-6h18" stroke="var(--weber-red)" strokeWidth="5" fill="none" strokeLinecap="round" />
+            <path d="M114 30V12a6 6 0 0 0-6-6H90" stroke="var(--weber-red)" strokeWidth="5" fill="none" strokeLinecap="round" />
+            <path d="M6 90v18a6 6 0 0 0 6 6h18" stroke="var(--weber-red)" strokeWidth="5" fill="none" strokeLinecap="round" />
+            <path d="M114 90v18a6 6 0 0 1-6 6H90" stroke="var(--weber-red)" strokeWidth="5" fill="none" strokeLinecap="round" />
+          </svg>
+        )}
 
         {state.status === "camera_error" && (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-weber-black p-6 text-center text-weber-cream">
@@ -123,40 +143,64 @@ export function QrScanner() {
           </div>
         )}
 
-        {state.status === "result" && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-weber-black/95 p-6 text-center text-weber-cream">
-            <CheckCircle2 className="size-10 text-primary" />
-            <div>
-              <p className="font-heading text-2xl uppercase tracking-wide">
-                {state.card.word}
+        {state.status === "result" && revealStyle && (
+          <div className="absolute inset-0 flex items-center justify-center bg-weber-black/95 p-6">
+            <div
+              className="animate-coaster-drop flex size-48 flex-col items-center justify-center rounded-full text-center"
+              style={{
+                border: `8px solid ${revealStyle.badgeBg}`,
+                background:
+                  "radial-gradient(circle at 35% 30%, #3a2620, #150c09 70%)",
+              }}
+            >
+              <div
+                className="mb-2.5 flex size-11 items-center justify-center rounded-full font-heading text-sm font-semibold text-white"
+                style={{ background: revealStyle.badgeBg }}
+              >
+                {revealStyle.mono}
+              </div>
+              <p className="font-heading text-[11px] uppercase tracking-wide text-weber-cream/70">
+                {state.card.language}
               </p>
-              <p className="text-sm text-weber-cream/70">
-                {state.card.item_name} · {state.card.language}
+              <p className="mt-0.5 text-lg font-semibold text-weber-cream">
+                {state.card.word}
               </p>
               <p className="mt-1 text-xs italic text-weber-cream/60">
                 {state.card.phonetic}
               </p>
             </div>
-            {state.alreadyCollected && (
-              <p className="text-xs uppercase tracking-wide text-weber-cream/60">
-                Already in your collection
-              </p>
-            )}
-            <Button
-              onClick={resumeScanning}
-              className="mt-2 rounded-xl font-heading uppercase tracking-wide"
-            >
-              <RotateCcw className="size-4" />
-              Scan Next Card
-            </Button>
           </div>
         )}
       </div>
 
-      <p className="max-w-sm text-center text-xs text-muted-foreground">
-        Point your camera at the QR code on a Weber card to collect it
-        automatically.
-      </p>
+      {state.status === "result" && (
+        <div className="flex w-full max-w-sm flex-col items-center gap-3 text-center">
+          <p className="text-sm text-muted-foreground">
+            {state.alreadyCollected ? (
+              "Already in your collection"
+            ) : (
+              <>
+                You unlocked <strong className="text-foreground">{state.card.item_name}</strong> in{" "}
+                <strong className="text-foreground">{state.card.language}</strong>
+              </>
+            )}
+          </p>
+          <Button
+            onClick={resumeScanning}
+            className="h-12 w-full rounded-2xl font-heading uppercase tracking-wide"
+          >
+            <RotateCcw className="size-4" />
+            Scan Next Coaster
+          </Button>
+        </div>
+      )}
+
+      {state.status !== "result" && (
+        <p className="max-w-sm text-center text-xs text-muted-foreground">
+          Point your camera at the QR code on the coaster to collect it
+          automatically.
+        </p>
+      )}
     </div>
   );
 }

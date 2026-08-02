@@ -18,7 +18,7 @@ const body = Inter({
 export const metadata: Metadata = {
   title: "Tongs & Tongues | Weber South Africa",
   description:
-    "Collect Weber braai gear cards, learn the words for them in five South African languages, and share your braai on the feed.",
+    "Collect Weber braai coasters, learn the words for your braai gear in five South African languages, and enter the monthly braai challenge to win a Weber voucher.",
 };
 
 export const viewport: Viewport = {

@@ -1,6 +1,11 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { subHours, subDays } from "date-fns";
-import type { Database, Card, PostWithVotes } from "@/lib/database.types";
+import type {
+  Database,
+  Card,
+  Challenge,
+  PostWithVotes,
+  HallOfFameEntry,
+} from "@/lib/database.types";
 
 type TypedClient = SupabaseClient<Database>;
 
@@ -107,71 +112,139 @@ export async function collectCard(
 }
 
 // ============================================================================
-// FEATURE 2 — BRAAI FEED
+// FEATURE 2 — MONTHLY BRAAI CHALLENGE
 // ============================================================================
 
-export const FEED_WINDOWS = ["today", "week", "month", "all"] as const;
-export type FeedWindow = (typeof FEED_WINDOWS)[number];
-
-function windowCutoff(window: FeedWindow): string | null {
-  const now = new Date();
-  switch (window) {
-    case "today":
-      return subHours(now, 24).toISOString();
-    case "week":
-      return subDays(now, 7).toISOString();
-    case "month":
-      return subDays(now, 30).toISOString();
-    case "all":
-      return null;
-  }
+// Lazily closes the active challenge if its window has elapsed (picks the
+// winner + mints their voucher) — see close_challenge_if_due() in
+// supabase/schema.sql. Cheap no-op when nothing is due; safe to call on
+// every page load instead of running a real cron/scheduler.
+export async function closeChallengeIfDue(supabase: TypedClient): Promise<void> {
+  const { error } = await supabase.rpc("close_challenge_if_due");
+  if (error) throw error;
 }
 
-export interface FeedPost extends PostWithVotes {
+export async function getActiveChallenge(
+  supabase: TypedClient
+): Promise<Challenge | null> {
+  const { data, error } = await supabase
+    .from("challenges")
+    .select("*")
+    .eq("status", "active")
+    .maybeSingle();
+
+  if (error) throw error;
+  return data;
+}
+
+export interface LeaderboardEntry extends PostWithVotes {
   hasVoted: boolean;
+  rank: number;
 }
 
-// Ranking (vote count within the window) is done in the query itself via the
-// posts_with_votes view + an order-by, not by pulling every vote row client-side.
-export async function getFeedPosts(
+// Ranking (vote count) is done in the query itself via the posts_with_votes
+// view + an order-by, not by pulling every vote row client-side.
+export async function getLeaderboard(
   supabase: TypedClient,
-  window: FeedWindow,
+  challengeId: string,
   userId: string | null
-): Promise<FeedPost[]> {
-  let query = supabase
+): Promise<LeaderboardEntry[]> {
+  const { data: posts, error } = await supabase
     .from("posts_with_votes")
     .select("*")
+    .eq("challenge_id", challengeId)
     .order("vote_count", { ascending: false })
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: true });
 
-  const cutoff = windowCutoff(window);
-  if (cutoff) {
-    query = query.gte("created_at", cutoff);
-  }
-
-  const { data: posts, error } = await query;
   if (error) throw error;
 
-  if (!userId || posts.length === 0) {
-    return posts.map((post) => ({ ...post, hasVoted: false }));
+  let votedPostIds = new Set<string>();
+  if (userId && posts.length > 0) {
+    const { data: userVotes, error: votesError } = await supabase
+      .from("votes")
+      .select("post_id")
+      .eq("user_id", userId)
+      .in(
+        "post_id",
+        posts.map((post) => post.id)
+      );
+    if (votesError) throw votesError;
+    votedPostIds = new Set(userVotes.map((vote) => vote.post_id));
   }
 
-  const { data: userVotes, error: votesError } = await supabase
-    .from("votes")
-    .select("post_id")
-    .eq("user_id", userId)
-    .in(
-      "post_id",
-      posts.map((post) => post.id)
-    );
-
-  if (votesError) throw votesError;
-
-  const votedPostIds = new Set(userVotes.map((vote) => vote.post_id));
-  return posts.map((post) => ({
+  return posts.map((post, index) => ({
     ...post,
     hasVoted: votedPostIds.has(post.id),
+    rank: index + 1,
   }));
+}
+
+export async function submitChallengeEntry(
+  supabase: TypedClient,
+  userId: string,
+  challengeId: string,
+  imageUrl: string,
+  caption: string,
+  displayName: string
+): Promise<void> {
+  const { error } = await supabase.from("posts").upsert(
+    {
+      user_id: userId,
+      challenge_id: challengeId,
+      image_url: imageUrl,
+      caption: caption || null,
+      display_name: displayName || "Braai Fan",
+    },
+    { onConflict: "challenge_id,user_id" }
+  );
+  if (error) throw error;
+}
+
+export interface MyVoucher {
+  code: string;
+  challengeTheme: string;
+  createdAt: string;
+}
+
+export async function getMyLatestVoucher(
+  supabase: TypedClient,
+  userId: string
+): Promise<MyVoucher | null> {
+  const { data: voucher, error } = await supabase
+    .from("voucher_codes")
+    .select("code, created_at, challenge_id")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) throw error;
+  if (!voucher) return null;
+
+  const { data: challenge, error: challengeError } = await supabase
+    .from("challenges")
+    .select("theme")
+    .eq("id", voucher.challenge_id)
+    .maybeSingle();
+  if (challengeError) throw challengeError;
+
+  return {
+    code: voucher.code,
+    createdAt: voucher.created_at,
+    challengeTheme: challenge?.theme ?? "",
+  };
+}
+
+export async function getHallOfFame(
+  supabase: TypedClient
+): Promise<HallOfFameEntry[]> {
+  const { data, error } = await supabase
+    .from("hall_of_fame")
+    .select("*")
+    .order("ends_at", { ascending: false });
+
+  if (error) throw error;
+  return data;
 }
 
 export async function toggleVote(
@@ -195,18 +268,6 @@ export async function toggleVote(
     .insert({ user_id: userId, post_id: postId });
   // unique_violation just means another tab already registered the vote — fine.
   if (error && error.code !== "23505") throw error;
-}
-
-export async function createPost(
-  supabase: TypedClient,
-  userId: string,
-  imageUrl: string,
-  caption: string
-): Promise<void> {
-  const { error } = await supabase
-    .from("posts")
-    .insert({ user_id: userId, image_url: imageUrl, caption: caption || null });
-  if (error) throw error;
 }
 
 export async function uploadBraaiPhoto(
