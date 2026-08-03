@@ -3,7 +3,7 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { toast } from "sonner";
 import { CameraOff, RotateCcw } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
+import { createClient, ensureUser } from "@/lib/supabase/client";
 import { collectCard, getCardById } from "@/lib/supabase/queries";
 import { Button } from "@/components/ui/button";
 import { COASTER_STYLES } from "@/lib/coasters";
@@ -68,12 +68,10 @@ export function QrScanner() {
 
     const code = decodedText.trim().toUpperCase();
     const supabase = createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const user = await ensureUser(supabase);
 
     if (!user) {
-      toast.error("Session not ready yet — try again in a moment.");
+      toast.error("Couldn't start a session — check your connection and try again.");
       resumeScanning();
       return;
     }

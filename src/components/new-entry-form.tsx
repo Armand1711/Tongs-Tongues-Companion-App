@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { ImagePlus, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
-import { createClient } from "@/lib/supabase/client";
+import { createClient, ensureUser } from "@/lib/supabase/client";
 import { submitChallengeEntry, uploadBraaiPhoto } from "@/lib/supabase/queries";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -51,12 +51,10 @@ export function NewEntryForm({ challengeId }: { challengeId: string }) {
     setSubmitting(true);
     try {
       const supabase = createClient();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      const user = await ensureUser(supabase);
 
       if (!user) {
-        toast.error("Session not ready yet — try again in a moment.");
+        toast.error("Couldn't start a session — check your connection and try again.");
         return;
       }
 

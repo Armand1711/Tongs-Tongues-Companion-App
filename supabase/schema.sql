@@ -1,24 +1,13 @@
--- Tongs & Tongues — Supabase schema
--- Run this in the Supabase SQL editor (or via `supabase db push`) on a fresh project.
--- Safe to re-run: uses IF NOT EXISTS / CREATE OR REPLACE where possible.
-
--- ============================================================================
--- EXTENSIONS
--- ============================================================================
 create extension if not exists "pgcrypto";
 
--- ============================================================================
--- FEATURE 1 — CARD COLLECTION SYSTEM
--- ============================================================================
-
 create table if not exists public.cards (
-  id text primary key, -- short QR id, e.g. 'CHR-ZU'
-  item_name text not null, -- e.g. 'Charcoal'
-  item_slug text not null, -- e.g. 'charcoal' (used in /collection/[item])
-  language text not null, -- e.g. 'Zulu'
-  language_code text not null, -- e.g. 'ZU'
-  word text not null, -- the translated word
-  phonetic text not null, -- phonetic pronunciation guide
+  id text primary key,
+  item_name text not null,
+  item_slug text not null,
+  language text not null,
+  language_code text not null,
+  word text not null,
+  phonetic text not null,
   image_url text,
   created_at timestamptz not null default now()
 );
@@ -39,13 +28,11 @@ create index if not exists user_collections_user_id_idx on public.user_collectio
 alter table public.cards enable row level security;
 alter table public.user_collections enable row level security;
 
--- Cards are public reference data — anyone (including anonymous auth users) can read them.
 drop policy if exists "cards are readable by everyone" on public.cards;
 create policy "cards are readable by everyone"
   on public.cards for select
   using (true);
 
--- Users (including anonymous) can only see and manage their own collected cards.
 drop policy if exists "users can read own collections" on public.user_collections;
 create policy "users can read own collections"
   on public.user_collections for select
@@ -55,10 +42,6 @@ drop policy if exists "users can insert own collections" on public.user_collecti
 create policy "users can insert own collections"
   on public.user_collections for insert
   with check (auth.uid() = user_id);
-
--- ============================================================================
--- FEATURE 2 — BRAAI FEED
--- ============================================================================
 
 create table if not exists public.posts (
   id uuid primary key default gen_random_uuid(),
@@ -93,6 +76,12 @@ create policy "users can insert own posts"
   on public.posts for insert
   with check (auth.uid() = user_id);
 
+drop policy if exists "users can update own posts" on public.posts;
+create policy "users can update own posts"
+  on public.posts for update
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
+
 drop policy if exists "votes are readable by everyone" on public.votes;
 create policy "votes are readable by everyone"
   on public.votes for select
@@ -107,27 +96,6 @@ drop policy if exists "users can delete own votes" on public.votes;
 create policy "users can delete own votes"
   on public.votes for delete
   using (auth.uid() = user_id);
-
--- View: posts with a precomputed vote count. Ranking/time-window filtering is
--- still done in the query layer (lib/supabase/queries.ts) so a single window
--- param can drive both the WHERE and ORDER BY without N different views.
-create or replace view public.posts_with_votes as
-select
-  p.id,
-  p.user_id,
-  p.image_url,
-  p.caption,
-  p.created_at,
-  count(v.id) as vote_count
-from public.posts p
-left join public.votes v on v.post_id = p.id
-group by p.id;
-
--- ============================================================================
--- STORAGE BUCKETS
--- ============================================================================
--- Run once. Public read (card art + braai photos are not sensitive), writes
--- restricted to authenticated (incl. anonymous) sessions.
 
 insert into storage.buckets (id, name, public)
 values ('card-images', 'card-images', true)
@@ -152,25 +120,6 @@ create policy "authenticated users can upload braai photos"
   on storage.objects for insert
   with check (bucket_id = 'braai-photos' and auth.role() = 'authenticated');
 
--- ============================================================================
--- SEED DATA — 5 items x 5 languages = 25 cards
--- ============================================================================
--- NOTE: translations/phonetics below are placeholder content for scaffolding
--- purposes only. Have a native-speaking linguist/cultural consultant verify
--- all isiZulu, isiXhosa, Afrikaans, Sesotho and Setswana copy before this goes
--- anywhere near production — several of these are simplified/approximate.
-
--- ============================================================================
--- FEATURE 3 — MONTHLY BRAAI CHALLENGE
--- ============================================================================
--- One challenge is "active" at a time. Entries are ordinary `posts` rows tied
--- to that challenge via challenge_id. When a challenge's window closes, the
--- top-voted entry's poster gets a generated voucher code that only they can
--- read (RLS-gated). There is no cron/scheduler here — closing happens lazily
--- the next time anyone loads the challenge (see close_challenge_if_due()) —
--- and seeding the *next* month's theme is a manual admin task, same as the
--- retailer list in src/lib/constants.ts.
-
 create table if not exists public.challenges (
   id uuid primary key default gen_random_uuid(),
   theme text not null,
@@ -183,12 +132,8 @@ create table if not exists public.challenges (
 alter table public.posts add column if not exists challenge_id uuid references public.challenges (id);
 alter table public.posts add column if not exists display_name text;
 
--- Re-declared now that challenge_id/display_name exist — same view as Feature 2,
--- extended so the leaderboard query can filter/label by them in one pass.
--- New columns are appended at the end: `create or replace view` requires the
--- existing columns to keep their original names/order (Postgres error 42P16
--- otherwise), so display_name/challenge_id can't be inserted before created_at.
-create or replace view public.posts_with_votes as
+drop view if exists public.posts_with_votes;
+create view public.posts_with_votes as
 select
   p.id,
   p.user_id,
@@ -202,15 +147,12 @@ from public.posts p
 left join public.votes v on v.post_id = p.id
 group by p.id;
 
--- Only one challenge may be active at a time — lets "current challenge"
--- queries be a plain `where status = 'active'` with no extra ordering.
 create unique index if not exists challenges_one_active_idx
   on public.challenges ((true)) where status = 'active';
 
--- One entry per user per challenge — resubmitting updates the existing post
--- (and keeps its accumulated votes) instead of splitting votes across two rows.
-create unique index if not exists posts_challenge_user_idx
-  on public.posts (challenge_id, user_id) where challenge_id is not null;
+drop index if exists public.posts_challenge_user_idx;
+create unique index posts_challenge_user_idx
+  on public.posts (challenge_id, user_id);
 
 create table if not exists public.voucher_codes (
   id uuid primary key default gen_random_uuid(),
@@ -230,19 +172,11 @@ create policy "challenges are readable by everyone"
   on public.challenges for select
   using (true);
 
--- Voucher codes are only visible to the winner — everyone else just sees
--- them referenced (masked) via the hall_of_fame view below.
 drop policy if exists "users can read own vouchers" on public.voucher_codes;
 create policy "users can read own vouchers"
   on public.voucher_codes for select
   using (auth.uid() = user_id);
 
--- Closes the active challenge once its window has elapsed: picks the
--- top-voted entry (ties broken by earliest submission), mints that user a
--- unique voucher code, and marks the challenge closed. SECURITY DEFINER so
--- it can write voucher_codes/challenges regardless of the caller's RLS —
--- safe to expose to any authenticated (incl. anonymous) caller because it
--- only ever acts on a challenge whose ends_at has already passed.
 create or replace function public.close_challenge_if_due()
 returns void
 language plpgsql
@@ -285,9 +219,8 @@ $$;
 
 grant execute on function public.close_challenge_if_due() to authenticated;
 
--- Hall of fame — one row per closed challenge that produced a winner, with
--- the winning post's content but no voucher code (that stays RLS-private).
-create or replace view public.hall_of_fame as
+drop view if exists public.hall_of_fame;
+create view public.hall_of_fame as
 select
   c.id as challenge_id,
   c.theme,
@@ -340,9 +273,6 @@ on conflict (id) do update set
   word = excluded.word,
   phonetic = excluded.phonetic;
 
--- Seed an initial month-long challenge if none is active yet. Re-running this
--- script won't create a second one — the partial unique index only allows
--- one 'active' row, and this insert is skipped once that row exists.
 insert into public.challenges (theme, starts_at, ends_at)
 select
   'Post your braai with your Kettle coaster in the shot',
