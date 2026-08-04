@@ -20,45 +20,50 @@ export function BottomNav() {
   );
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/80">
-      <div className="relative mx-auto max-w-md">
-        {activeIndex >= 0 && (
-          <div
-            className="absolute top-0 h-0.5 w-1/5 rounded-full bg-primary transition-transform duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
-            style={{ transform: `translateX(${activeIndex * 100}%)` }}
-            aria-hidden
-          />
-        )}
-        <ul className="flex items-stretch justify-between px-2">
-          {NAV_ITEMS.map(({ href, label, icon: Icon }, index) => {
-            const isActive = index === activeIndex;
+    <nav className="fixed inset-x-4 bottom-5 z-50 mx-auto max-w-md">
+      <ul
+        className="flex items-center justify-around rounded-[24px] border border-white/10 px-2 py-2.5 shadow-[0_10px_30px_rgba(0,0,0,0.4)] backdrop-blur-2xl"
+        style={{ background: "oklch(0.14 0.012 40 / 78%)" }}
+      >
+        {NAV_ITEMS.map(({ href, label, icon: Icon }, index) => {
+          const isActive = index === activeIndex;
 
-            return (
-              <li key={href} className="flex-1">
-                <Link
-                  href={href}
+          return (
+            <li key={href}>
+              <Link
+                href={href}
+                className="flex flex-col items-center gap-1 px-1.5 py-1"
+              >
+                <span
                   className={cn(
-                    "flex flex-col items-center gap-1 py-3 text-[11px] font-medium transition-colors",
-                    isActive
-                      ? "text-primary"
-                      : "text-muted-foreground hover:text-foreground"
+                    "flex h-[30px] w-10 items-center justify-center rounded-xl transition-colors duration-200",
+                    isActive && "bg-primary/20"
                   )}
                 >
                   <Icon
                     className={cn(
-                      "size-5 transition-transform duration-200",
-                      isActive && "scale-110"
+                      "size-[18px] transition-transform duration-200",
+                      isActive
+                        ? "scale-110 text-weber-ember"
+                        : "text-muted-foreground"
                     )}
                     strokeWidth={isActive ? 2.5 : 2}
                     aria-hidden
                   />
+                </span>
+                <span
+                  className={cn(
+                    "text-[9px] font-bold uppercase tracking-wide",
+                    isActive ? "text-foreground" : "text-muted-foreground/70"
+                  )}
+                >
                   {label}
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
-      </div>
+                </span>
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
     </nav>
   );
 }

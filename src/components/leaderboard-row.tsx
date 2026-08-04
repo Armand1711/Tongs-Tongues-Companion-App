@@ -43,10 +43,10 @@ export function LeaderboardRow({
   const rankLabel =
     entry.rank <= 3 ? RANK_MEDALS[entry.rank - 1] : String(entry.rank);
   const rankColor =
-    entry.rank === 1 ? "text-primary" : entry.rank <= 3 ? "text-[#b5651d]" : "text-muted-foreground";
+    entry.rank === 1 ? "text-primary" : entry.rank <= 3 ? "text-weber-ember" : "text-muted-foreground";
 
   return (
-    <div className="flex items-center gap-3 border-b border-border py-3 last:border-b-0">
+    <div className="mb-2.5 flex items-center gap-3 rounded-2xl border border-border bg-card p-3">
       <span
         className={cn(
           "w-6 shrink-0 text-center font-heading text-sm font-bold",
@@ -82,7 +82,7 @@ export function LeaderboardRow({
         aria-pressed={voted}
         className={cn(
           "flex shrink-0 flex-col items-center gap-0.5 rounded-xl px-2.5 py-2 text-[11px] font-semibold transition-all duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)] disabled:opacity-50",
-          voted ? "scale-[1.08] bg-primary/10 text-primary" : "scale-100 bg-muted text-foreground"
+          voted ? "scale-[1.08] bg-primary/20 text-weber-ember" : "scale-100 bg-muted text-foreground"
         )}
       >
         <span className="text-base leading-none">🔥</span>

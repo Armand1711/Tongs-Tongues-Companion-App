@@ -16,6 +16,8 @@
   --color-weber-white: var(--weber-white);
   --color-weber-border: var(--weber-border);
   --color-weber-ember: var(--weber-ember);
+  --color-weber-ember-start: var(--weber-ember-start);
+  --color-weber-ember-end: var(--weber-ember-end);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -55,46 +57,48 @@
 }
 
 :root {
-  /* Weber brand palette */
-  --weber-black: #0c0c0c;
-  --weber-cream: #f5f3ee;
-  --weber-red: #d8291d;
-  --weber-white: #ffffff;
-  --weber-border: #e0ded6;
-  --weber-ember: #f2994a;
+  /* Weber brand palette — dark ember/charcoal braai theme */
+  --weber-black: oklch(0.08 0.01 40);
+  --weber-cream: oklch(0.95 0.01 80);
+  --weber-red: oklch(0.63 0.2 35);
+  --weber-white: oklch(0.97 0.01 60);
+  --weber-border: oklch(1 0 0 / 8%);
+  --weber-ember: oklch(0.8 0.16 70);
+  --weber-ember-start: oklch(0.72 0.19 45);
+  --weber-ember-end: oklch(0.55 0.22 25);
 
-  --background: var(--weber-cream);
-  --foreground: var(--weber-black);
-  --card: var(--weber-white);
-  --card-foreground: var(--weber-black);
-  --popover: var(--weber-white);
-  --popover-foreground: var(--weber-black);
-  --primary: var(--weber-red);
-  --primary-foreground: var(--weber-white);
-  --secondary: var(--weber-black);
-  --secondary-foreground: var(--weber-white);
-  --muted: var(--weber-border);
-  --muted-foreground: #6b6860;
-  --accent: var(--weber-border);
-  --accent-foreground: var(--weber-black);
+  --background: oklch(0.1 0.012 40);
+  --foreground: var(--weber-cream);
+  --card: oklch(0.17 0.015 40);
+  --card-foreground: var(--weber-cream);
+  --popover: oklch(0.17 0.015 40);
+  --popover-foreground: var(--weber-cream);
+  --primary: var(--weber-ember-start);
+  --primary-foreground: oklch(0.98 0.01 60);
+  --secondary: oklch(0.2 0.015 40);
+  --secondary-foreground: var(--weber-cream);
+  --muted: oklch(1 0 0 / 6%);
+  --muted-foreground: oklch(0.62 0.02 60);
+  --accent: oklch(1 0 0 / 8%);
+  --accent-foreground: var(--weber-cream);
   --destructive: var(--weber-red);
-  --border: var(--weber-border);
-  --input: var(--weber-border);
-  --ring: var(--weber-red);
-  --chart-1: var(--weber-red);
-  --chart-2: var(--weber-black);
-  --chart-3: #6b6860;
-  --chart-4: var(--weber-border);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 10%);
+  --ring: var(--weber-ember-start);
+  --chart-1: var(--weber-ember-start);
+  --chart-2: var(--weber-cream);
+  --chart-3: oklch(0.62 0.02 60);
+  --chart-4: oklch(1 0 0 / 10%);
   --chart-5: var(--weber-white);
   --radius: 1rem;
-  --sidebar: var(--weber-white);
-  --sidebar-foreground: var(--weber-black);
-  --sidebar-primary: var(--weber-red);
-  --sidebar-primary-foreground: var(--weber-white);
-  --sidebar-accent: var(--weber-border);
-  --sidebar-accent-foreground: var(--weber-black);
-  --sidebar-border: var(--weber-border);
-  --sidebar-ring: var(--weber-red);
+  --sidebar: oklch(0.17 0.015 40);
+  --sidebar-foreground: var(--weber-cream);
+  --sidebar-primary: var(--weber-ember-start);
+  --sidebar-primary-foreground: oklch(0.98 0.01 60);
+  --sidebar-accent: oklch(1 0 0 / 8%);
+  --sidebar-accent-foreground: var(--weber-cream);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: var(--weber-ember-start);
 }
 
 .dark {
@@ -137,6 +141,13 @@
   }
   body {
     @apply bg-background text-foreground;
+    background-image: radial-gradient(
+      120% 90% at 50% 0%,
+      oklch(0.2 0.03 40) 0%,
+      oklch(0.1 0.012 40) 55%,
+      oklch(0.08 0.01 40) 100%
+    );
+    background-attachment: fixed;
   }
   html {
     @apply font-sans;
@@ -155,11 +166,11 @@
 
 @keyframes coaster-drop {
   0% {
-    transform: scale(0.45) translateY(-30px);
+    transform: scale(0.4) translateY(30px);
     opacity: 0;
   }
-  55% {
-    transform: scale(1.06) translateY(2px);
+  60% {
+    transform: scale(1.08) translateY(-6px);
     opacity: 1;
   }
   100% {
@@ -171,10 +182,10 @@
 @keyframes glow-pulse {
   0%,
   100% {
-    box-shadow: 0 0 0 0 rgba(216, 41, 29, 0.35);
+    box-shadow: 0 0 0 0 oklch(0.7 0.19 45 / 55%);
   }
   50% {
-    box-shadow: 0 0 0 16px rgba(216, 41, 29, 0);
+    box-shadow: 0 0 0 14px oklch(0.7 0.19 45 / 0%);
   }
 }
 
@@ -195,7 +206,7 @@
     opacity: 1;
   }
   50% {
-    opacity: 0.55;
+    opacity: 0.4;
   }
 }
 
@@ -205,6 +216,39 @@
   }
   100% {
     background-position: 200% 50%;
+  }
+}
+
+@keyframes flame-flicker {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scaleX(1) scaleY(1) translateX(0);
+  }
+  20% {
+    opacity: 0.7;
+    transform: scaleX(1.08) scaleY(1.15) translateX(-3px);
+  }
+  45% {
+    opacity: 0.45;
+    transform: scaleX(0.92) scaleY(0.95) translateX(4px);
+  }
+  65% {
+    opacity: 0.65;
+    transform: scaleX(1.05) scaleY(1.1) translateX(-2px);
+  }
+  85% {
+    opacity: 0.5;
+    transform: scaleX(0.96) scaleY(1.02) translateX(2px);
+  }
+}
+
+@keyframes scanline {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(220px);
   }
 }
 
@@ -224,15 +268,38 @@
   animation: tick-pulse 2s ease-in-out infinite;
 }
 
+.animate-flame-flicker {
+  animation: flame-flicker 2.6s ease-in-out infinite;
+}
+
+.animate-scanline {
+  animation: scanline 1.4s ease-in-out infinite alternate;
+}
+
 .progress-ember-fill {
   background-image: linear-gradient(
     90deg,
-    var(--weber-red),
+    var(--weber-ember-end),
+    var(--weber-ember-start),
     var(--weber-ember),
-    var(--weber-red)
+    var(--weber-ember-start),
+    var(--weber-ember-end)
   );
   background-size: 200% 100%;
-  animation: ember-sweep 2.4s linear infinite;
+  animation: ember-sweep 3s linear infinite;
+}
+
+.coaster-shape {
+  clip-path: polygon(
+    30% 0%,
+    70% 0%,
+    100% 30%,
+    100% 70%,
+    70% 100%,
+    30% 100%,
+    0% 70%,
+    0% 30%
+  );
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -240,6 +307,8 @@
   .animate-glow-pulse,
   .animate-ember-rise,
   .animate-tick-pulse,
+  .animate-flame-flicker,
+  .animate-scanline,
   .progress-ember-fill {
     animation: none !important;
   }

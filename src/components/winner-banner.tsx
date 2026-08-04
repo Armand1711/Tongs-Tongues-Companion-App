@@ -21,7 +21,11 @@ export function WinnerBanner({ code }: { code: string }) {
   return (
     <Link
       href="/feed/winner"
-      className="mx-4 mt-4 flex items-center justify-between gap-3 rounded-2xl bg-gradient-to-br from-primary to-[#8a1a12] p-4 text-primary-foreground shadow-sm animate-glow-pulse"
+      className="mx-4 mt-4 flex items-center justify-between gap-3 rounded-2xl p-4 text-primary-foreground shadow-sm animate-glow-pulse"
+      style={{
+        background:
+          "linear-gradient(135deg, var(--weber-ember-start), var(--weber-ember-end))",
+      }}
     >
       <span className="font-heading text-sm font-semibold">
         🏆 You won this month&apos;s challenge!

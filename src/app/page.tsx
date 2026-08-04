@@ -40,24 +40,36 @@ export default async function HomePage() {
             Weber South Africa
           </p>
         </div>
-        <div className="flex size-9 items-center justify-center rounded-full bg-weber-black font-heading text-[13px] font-semibold text-weber-cream">
-          TT
+        <div
+          className="flex size-[46px] items-center justify-center rounded-full shadow-[0_0_20px_oklch(0.6_0.2_30_/_55%)]"
+          style={{
+            background:
+              "conic-gradient(from 180deg, var(--weber-ember-start), var(--weber-ember-end), var(--weber-ember-start))",
+          }}
+        >
+          <div className="flex size-[38px] items-center justify-center rounded-full bg-weber-black font-heading text-xs font-semibold tracking-wide text-weber-cream">
+            T&amp;T
+          </div>
         </div>
       </header>
 
-      <section className="relative overflow-hidden rounded-[20px] bg-weber-black p-6 text-weber-cream">
-        <p className="font-heading text-xs uppercase tracking-[0.15em] text-weber-cream/60">
-          Your Coasters
-        </p>
-        <div className="mt-1.5 mb-4 flex items-baseline gap-2">
-          <span className="font-heading text-4xl font-bold">
+      <section
+        className="relative overflow-hidden rounded-3xl border border-white/8 p-[22px] text-weber-cream"
+        style={{
+          background:
+            "linear-gradient(155deg, oklch(0.2 0.02 40), oklch(0.13 0.014 40))",
+        }}
+      >
+        <div className="mb-3 flex items-baseline justify-between">
+          <p className="font-heading text-xs uppercase tracking-[0.15em] text-muted-foreground">
+            Your Coasters
+          </p>
+          <p className="font-heading text-[15px] font-semibold">
             {collectedCount}
-          </span>
-          <span className="text-sm text-weber-cream/60">
-            / {TOTAL_CARDS} unlocked
-          </span>
+            <span className="text-muted-foreground"> / {TOTAL_CARDS}</span>
+          </p>
         </div>
-        <div className="h-2 w-full overflow-hidden rounded-full bg-white/10">
+        <div className="h-2.5 w-full overflow-hidden rounded-full bg-white/8">
           <div
             className="progress-ember-fill h-full rounded-full transition-[width] duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
             style={{ width: `${progressPct}%` }}
@@ -69,7 +81,11 @@ export default async function HomePage() {
         render={<Link href="/scan" />}
         nativeButton={false}
         size="lg"
-        className="h-14 rounded-2xl text-base font-heading uppercase tracking-wide active:scale-[0.97]"
+        className="h-14 rounded-[20px] border-0 text-base font-heading uppercase tracking-wide shadow-[0_10px_30px_oklch(0.55_0.22_25_/_45%)] active:scale-[0.97]"
+        style={{
+          background:
+            "linear-gradient(135deg, var(--weber-ember-start), var(--weber-ember-end))",
+        }}
       >
         <ScanLine className="size-5" />
         Scan a Coaster
@@ -92,7 +108,7 @@ export default async function HomePage() {
                 className="rounded-2xl border border-border bg-card p-3.5 shadow-sm transition-transform active:scale-[0.97]"
               >
                 <div
-                  className="flex size-10 items-center justify-center rounded-full font-heading text-[13px] font-semibold text-white"
+                  className="flex size-10 items-center justify-center rounded-xl font-heading text-[13px] font-semibold text-weber-black"
                   style={{ background: style.badgeBg }}
                 >
                   {style.mono}
@@ -112,17 +128,21 @@ export default async function HomePage() {
       {challenge && (
         <Link
           href="/feed"
-          className="flex items-center justify-between gap-3 rounded-2xl bg-gradient-to-br from-primary to-[#8a1a12] p-4 text-primary-foreground shadow-sm transition-transform active:scale-[0.98]"
+          className="flex items-center justify-between gap-3 rounded-[20px] border border-white/10 p-[18px] text-weber-cream transition-transform active:scale-[0.98]"
+          style={{
+            background:
+              "linear-gradient(120deg, oklch(0.3 0.15 30), oklch(0.24 0.16 20))",
+          }}
         >
           <div>
-            <p className="text-[10px] uppercase tracking-[0.15em] text-primary-foreground/70">
-              This Month&apos;s Challenge
+            <p className="text-[11px] uppercase tracking-[0.15em] text-weber-ember/85">
+              🔥 This Month&apos;s Challenge
             </p>
             <p className="mt-1 font-heading text-sm font-semibold">
               {challenge.theme}
             </p>
           </div>
-          <ArrowRight className="size-5 shrink-0" />
+          <ArrowRight className="size-5 shrink-0 text-weber-cream/70" />
         </Link>
       )}
     </div>

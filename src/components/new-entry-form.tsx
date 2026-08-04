@@ -137,7 +137,11 @@ export function NewEntryForm({ challengeId }: { challengeId: string }) {
         type="submit"
         disabled={submitting}
         size="lg"
-        className="h-14 rounded-2xl text-base font-heading uppercase tracking-wide"
+        className="h-14 rounded-[20px] border-0 text-base font-heading uppercase tracking-wide"
+        style={{
+          background:
+            "linear-gradient(135deg, var(--weber-ember-start), var(--weber-ember-end))",
+        }}
       >
         {submitting && <Loader2 className="size-5 animate-spin" />}
         {submitting ? "Submitting..." : "Submit Entry"}

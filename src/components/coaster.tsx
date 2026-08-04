@@ -44,39 +44,50 @@ export function Coaster({
         type="button"
         onClick={() => selected.unlocked && setIsFlipped((f) => !f)}
         aria-label={selected.unlocked ? "Flip coaster" : "Locked coaster"}
-        className="flex size-56 items-center justify-center rounded-full"
+        className="relative size-56 [perspective:1200px]"
       >
-        {selected.unlocked ? (
+        {!selected.unlocked ? (
+          <div className="relative flex size-full flex-col items-center justify-center gap-1">
+            <svg viewBox="0 0 100 100" className="absolute inset-0 size-full">
+              <polygon
+                points="30,0 70,0 100,30 100,70 70,100 30,100 0,70 0,30"
+                fill="none"
+                stroke="var(--border)"
+                strokeWidth="3"
+                strokeDasharray="6 5"
+              />
+            </svg>
+            <p className="font-heading text-xs uppercase tracking-wide text-muted-foreground">
+              Locked
+            </p>
+          </div>
+        ) : (
           <div
-            key={`${selectedIndex}-${isFlipped}`}
-            className="animate-coaster-drop flex size-full flex-col items-center justify-center rounded-full shadow-lg"
-            style={
-              isFlipped
-                ? {
-                    border: "8px solid var(--weber-red)",
-                    background:
-                      "repeating-linear-gradient(45deg, #8a6a4a, #8a6a4a 6px, #7a5c3f 6px, #7a5c3f 12px)",
-                  }
-                : {
-                    border: `8px solid ${badgeBg}`,
-                    background:
-                      "radial-gradient(circle at 35% 30%, #241a15, #0c0c0c 70%)",
-                  }
-            }
+            key={selectedIndex}
+            className="animate-coaster-drop absolute inset-0 transition-transform duration-[600ms] [transform-style:preserve-3d]"
+            style={{
+              transition: "transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1)",
+              transform: isFlipped ? "rotateY(180deg)" : "rotateY(0deg)",
+            }}
           >
-            {isFlipped ? (
-              <>
-                <p className="font-heading text-2xl font-bold tracking-wide text-weber-cream">
-                  {selected.word}
-                </p>
-                <p className="mt-1.5 text-xs text-weber-cream/85">
-                  {selected.phonetic}
-                </p>
-              </>
-            ) : (
-              <>
+            {/* front */}
+            <div className="absolute inset-0 [backface-visibility:hidden]">
+              <div
+                className="coaster-shape absolute inset-0"
+                style={{
+                  background: badgeBg,
+                  filter: `drop-shadow(0 0 28px ${badgeBg})`,
+                }}
+              />
+              <div
+                className="coaster-shape absolute inset-[7px] flex flex-col items-center justify-center gap-2.5"
+                style={{
+                  background:
+                    "radial-gradient(circle at 35% 28%, oklch(0.3 0.05 45), oklch(0.12 0.012 40) 70%)",
+                }}
+              >
                 <div
-                  className="mb-3 flex size-14 items-center justify-center rounded-full font-heading text-[17px] font-semibold text-white"
+                  className="flex size-14 items-center justify-center rounded-full font-heading text-[17px] font-semibold text-weber-black"
                   style={{ background: badgeBg }}
                 >
                   {mono}
@@ -84,14 +95,40 @@ export function Coaster({
                 <p className="font-heading text-xs uppercase tracking-wide text-weber-cream">
                   {selected.label}
                 </p>
-              </>
-            )}
-          </div>
-        ) : (
-          <div className="flex size-full flex-col items-center justify-center rounded-full border-3 border-dashed border-border">
-            <p className="font-heading text-xs uppercase tracking-wide text-muted-foreground">
-              Locked
-            </p>
+                <p className="text-[10px] uppercase tracking-[0.08em] text-muted-foreground">
+                  Tap to flip
+                </p>
+              </div>
+            </div>
+
+            {/* back */}
+            <div
+              className="absolute inset-0 [backface-visibility:hidden]"
+              style={{ transform: "rotateY(180deg)" }}
+            >
+              <div
+                className="coaster-shape absolute inset-0"
+                style={{
+                  background: "var(--weber-ember-start)",
+                  filter:
+                    "drop-shadow(0 0 28px var(--weber-ember-start))",
+                }}
+              />
+              <div
+                className="coaster-shape absolute inset-[7px] flex flex-col items-center justify-center gap-2 px-5 text-center"
+                style={{
+                  background:
+                    "repeating-linear-gradient(45deg, oklch(0.16 0.014 40), oklch(0.16 0.014 40) 8px, oklch(0.19 0.016 40) 8px, oklch(0.19 0.016 40) 16px)",
+                }}
+              >
+                <p className="font-heading text-2xl font-bold tracking-wide text-weber-cream/90 italic">
+                  {selected.word}
+                </p>
+                <p className="font-mono text-xs text-muted-foreground">
+                  {selected.phonetic}
+                </p>
+              </div>
+            </div>
           </div>
         )}
       </button>
@@ -111,7 +148,10 @@ export function Coaster({
             aria-label={`Show ${lang.label}`}
             className="size-2.5 rounded-full transition-colors"
             style={{
-              background: index === selectedIndex ? badgeBg : "var(--weber-border)",
+              background:
+                index === selectedIndex ? badgeBg : "oklch(1 0 0 / 12%)",
+              boxShadow:
+                index === selectedIndex ? `0 0 8px ${badgeBg}` : "none",
             }}
           />
         ))}

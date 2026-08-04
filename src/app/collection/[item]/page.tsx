@@ -85,17 +85,6 @@ export default async function ItemDetailPage({
       />
 
       {isComplete && (
-        <div className="rounded-2xl bg-weber-black p-4 text-center text-weber-cream">
-          <p className="font-heading text-[13px] uppercase tracking-wide">
-            Set Complete
-          </p>
-          <p className="mt-1 text-xs text-weber-cream/70">
-            10% off {itemName} at participating retailers
-          </p>
-        </div>
-      )}
-
-      {isComplete && (
         <SetCompleteModal itemSlug={item} itemName={itemName} />
       )}
     </div>

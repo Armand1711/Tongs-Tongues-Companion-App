@@ -3,7 +3,6 @@ import { createClient } from "@/lib/supabase/server";
 import { getAllCards, getCollectedCardIds } from "@/lib/supabase/queries";
 import { ITEM_ORDER, TOTAL_CARDS, type ItemSlug } from "@/lib/constants";
 import { COASTER_STYLES } from "@/lib/coasters";
-import { cn } from "@/lib/utils";
 
 export default async function CollectionPage() {
   const supabase = await createClient();
@@ -29,7 +28,7 @@ export default async function CollectionPage() {
         </p>
       </header>
 
-      <div className="flex flex-col gap-5">
+      <div className="flex flex-col gap-3">
         {ITEM_ORDER.map((slug) => {
           const itemCards = cards
             .filter((card) => card.item_slug === slug)
@@ -38,46 +37,53 @@ export default async function CollectionPage() {
           const style = COASTER_STYLES[slug as ItemSlug];
 
           return (
-            <div key={slug}>
-              <div className="mb-2.5 flex items-center justify-between">
-                <p className="font-heading text-[13px] font-semibold uppercase tracking-wide text-foreground">
-                  {itemName}
-                </p>
-                <Link
-                  href={`/collection/${slug}`}
-                  className="text-[11px] font-semibold text-primary"
-                >
-                  View →
-                </Link>
+            <Link
+              key={slug}
+              href={`/collection/${slug}`}
+              className="rounded-2xl border border-border bg-card p-4"
+            >
+              <div className="mb-3 flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <div
+                    className="flex size-8 items-center justify-center rounded-[10px] font-heading text-[11px] font-semibold text-weber-black"
+                    style={{ background: style.badgeBg }}
+                  >
+                    {style.mono}
+                  </div>
+                  <p className="font-heading text-sm uppercase tracking-wide text-foreground">
+                    {itemName}
+                  </p>
+                </div>
+                <span className="text-xs text-muted-foreground">View ›</span>
               </div>
-              <div className="flex gap-2.5">
+
+              <div className="flex gap-2">
                 {itemCards.map((card) => {
                   const unlocked = collectedIds.has(card.id);
                   return (
-                    <Link
+                    <div
                       key={card.id}
-                      href={`/collection/${slug}?lang=${card.language_code}`}
-                      aria-label={`${itemName} — ${card.language}`}
-                      className={cn(
-                        "flex size-[52px] shrink-0 items-center justify-center rounded-full transition-transform active:scale-90",
-                        !unlocked && "border-2 border-dashed border-border"
-                      )}
+                      className="flex h-9 flex-1 items-center justify-center rounded-[10px] text-[10px] font-bold"
                       style={
                         unlocked
-                          ? { background: style.badgeBg }
-                          : { background: "var(--weber-cream)" }
+                          ? {
+                              background: `oklch(0.55 0.15 ${style.hue} / 30%)`,
+                              border: `1px solid oklch(0.55 0.15 ${style.hue} / 70%)`,
+                              color: "oklch(0.9 0.02 60)",
+                            }
+                          : {
+                              background: "oklch(1 0 0 / 4%)",
+                              border: "1px dashed oklch(1 0 0 / 15%)",
+                              color: "oklch(0.45 0.01 60)",
+                            }
                       }
                     >
-                      {unlocked && (
-                        <span className="font-heading text-[9px] tracking-wide text-weber-cream">
-                          {card.language_code}
-                        </span>
-                      )}
-                    </Link>
+                      {unlocked ? card.language_code : "·"}
+                    </div>
                   );
                 })}
               </div>
-            </div>
+            </Link>
           );
         })}
       </div>

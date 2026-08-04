@@ -3,14 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Trophy } from "lucide-react";
-
-const EMBERS = [
-  { left: "20%", delay: "0.1s", duration: "2.6s", size: 6, color: "var(--weber-ember)" },
-  { left: "35%", delay: "0.6s", duration: "2.2s", size: 5, color: "var(--weber-red)" },
-  { left: "55%", delay: "1s", duration: "2.8s", size: 7, color: "var(--weber-ember)" },
-  { left: "70%", delay: "0.3s", duration: "2.3s", size: 5, color: "var(--weber-red)" },
-  { left: "85%", delay: "0.8s", duration: "2.5s", size: 6, color: "var(--weber-ember)" },
-];
+import { emberBurst } from "@/components/ember-field";
 
 export function WinnerReveal({
   code,
@@ -23,6 +16,7 @@ export function WinnerReveal({
 
   useEffect(() => {
     localStorage.setItem(`tt-voucher-seen:${code}`, "1");
+    emberBurst(60);
   }, [code]);
 
   function copyCode() {
@@ -33,21 +27,6 @@ export function WinnerReveal({
 
   return (
     <div className="relative overflow-hidden px-6 py-8 text-center">
-      {EMBERS.map((ember, index) => (
-        <div
-          key={index}
-          className="animate-ember-rise pointer-events-none absolute top-[62%] rounded-full"
-          style={{
-            left: ember.left,
-            width: ember.size,
-            height: ember.size,
-            background: ember.color,
-            animationDelay: ember.delay,
-            animationDuration: ember.duration,
-          }}
-        />
-      ))}
-
       <div className="animate-glow-pulse mx-auto mb-4 flex size-28 items-center justify-center rounded-full bg-[radial-gradient(circle_at_35%_30%,var(--weber-ember),var(--weber-red)_70%)]">
         <Trophy className="size-11 text-white" />
       </div>

@@ -25,7 +25,7 @@ export function ChallengeCountdown({ endsAt }: { endsAt: string }) {
   }, [endsAtMs]);
 
   return (
-    <div className="flex gap-2">
+    <div className="flex flex-1 gap-2">
       <CountdownUnit value={parts.days} label="days" pulse />
       <CountdownUnit value={parts.hours} label="hrs" />
       <CountdownUnit value={parts.mins} label="min" />
@@ -43,13 +43,13 @@ function CountdownUnit({
   pulse?: boolean;
 }) {
   return (
-    <div className="min-w-[52px] rounded-[10px] bg-white/10 px-2.5 py-2 text-center">
+    <div className="flex-1 rounded-xl bg-black/25 px-1 py-2 text-center">
       <div
         className={`font-heading text-lg font-bold ${pulse ? "animate-tick-pulse" : ""}`}
       >
         {value}
       </div>
-      <div className="text-[9px] uppercase tracking-wide text-white/50">
+      <div className="text-[10px] uppercase tracking-wide text-weber-cream/85">
         {label}
       </div>
     </div>

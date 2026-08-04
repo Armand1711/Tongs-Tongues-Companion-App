@@ -7,6 +7,7 @@ import { createClient, ensureUser } from "@/lib/supabase/client";
 import { collectCard, getCardById } from "@/lib/supabase/queries";
 import { Button } from "@/components/ui/button";
 import { COASTER_STYLES } from "@/lib/coasters";
+import { emberBurst } from "@/components/ember-field";
 import type { ItemSlug } from "@/lib/constants";
 import type { Card as CardData } from "@/lib/database.types";
 
@@ -96,6 +97,7 @@ export function QrScanner() {
       card,
       alreadyCollected: result.status === "already_collected",
     });
+    if (result.status === "collected") emberBurst(45);
   }
 
   function resumeScanning() {
@@ -112,20 +114,30 @@ export function QrScanner() {
 
   return (
     <div className="flex flex-col items-center gap-4">
-      <div className="relative aspect-square w-full max-w-sm overflow-hidden rounded-[24px] border border-border bg-black">
+      <div className="relative aspect-square w-full max-w-sm overflow-hidden rounded-[28px] border border-white/10 bg-weber-black">
         <div id={elementId} ref={containerRef} className="size-full [&_video]:size-full [&_video]:object-cover" />
 
         {state.status === "scanning" && (
-          <svg
-            viewBox="0 0 120 120"
-            className="pointer-events-none absolute inset-0 m-auto size-28 opacity-80"
-            aria-hidden
-          >
-            <path d="M6 30V12a6 6 0 0 1 6-6h18" stroke="var(--weber-red)" strokeWidth="5" fill="none" strokeLinecap="round" />
-            <path d="M114 30V12a6 6 0 0 0-6-6H90" stroke="var(--weber-red)" strokeWidth="5" fill="none" strokeLinecap="round" />
-            <path d="M6 90v18a6 6 0 0 0 6 6h18" stroke="var(--weber-red)" strokeWidth="5" fill="none" strokeLinecap="round" />
-            <path d="M114 90v18a6 6 0 0 1-6 6H90" stroke="var(--weber-red)" strokeWidth="5" fill="none" strokeLinecap="round" />
-          </svg>
+          <>
+            <svg
+              viewBox="0 0 120 120"
+              className="pointer-events-none absolute inset-0 m-auto size-28 opacity-80"
+              aria-hidden
+            >
+              <path d="M6 30V12a6 6 0 0 1 6-6h18" stroke="var(--weber-ember-start)" strokeWidth="5" fill="none" strokeLinecap="round" />
+              <path d="M114 30V12a6 6 0 0 0-6-6H90" stroke="var(--weber-ember-start)" strokeWidth="5" fill="none" strokeLinecap="round" />
+              <path d="M6 90v18a6 6 0 0 0 6 6h18" stroke="var(--weber-ember-start)" strokeWidth="5" fill="none" strokeLinecap="round" />
+              <path d="M114 90v18a6 6 0 0 1-6 6H90" stroke="var(--weber-ember-start)" strokeWidth="5" fill="none" strokeLinecap="round" />
+            </svg>
+            <div
+              className="animate-scanline pointer-events-none absolute inset-x-6 top-6 h-[3px] rounded-full"
+              style={{
+                background:
+                  "linear-gradient(90deg, transparent, var(--weber-ember-start), transparent)",
+                boxShadow: "0 0 12px oklch(0.72 0.19 45 / 80%)",
+              }}
+            />
+          </>
         )}
 
         {state.status === "camera_error" && (
@@ -143,29 +155,37 @@ export function QrScanner() {
 
         {state.status === "result" && revealStyle && (
           <div className="absolute inset-0 flex items-center justify-center bg-weber-black/95 p-6">
-            <div
-              className="animate-coaster-drop flex size-48 flex-col items-center justify-center rounded-full text-center"
-              style={{
-                border: `8px solid ${revealStyle.badgeBg}`,
-                background:
-                  "radial-gradient(circle at 35% 30%, #3a2620, #150c09 70%)",
-              }}
-            >
+            <div className="animate-coaster-drop relative size-48">
               <div
-                className="mb-2.5 flex size-11 items-center justify-center rounded-full font-heading text-sm font-semibold text-white"
-                style={{ background: revealStyle.badgeBg }}
+                className="coaster-shape absolute inset-0"
+                style={{
+                  background: revealStyle.badgeBg,
+                  filter: `drop-shadow(0 0 32px ${revealStyle.badgeBg})`,
+                }}
+              />
+              <div
+                className="coaster-shape absolute inset-[6px] flex flex-col items-center justify-center gap-1 text-center"
+                style={{
+                  background:
+                    "radial-gradient(circle at 35% 30%, oklch(0.3 0.05 45), oklch(0.12 0.012 40) 70%)",
+                }}
               >
-                {revealStyle.mono}
+                <div
+                  className="mb-1.5 flex size-11 items-center justify-center rounded-full font-heading text-sm font-semibold text-weber-black"
+                  style={{ background: revealStyle.badgeBg }}
+                >
+                  {revealStyle.mono}
+                </div>
+                <p className="font-heading text-[11px] uppercase tracking-wide text-muted-foreground">
+                  {state.card.language}
+                </p>
+                <p className="mt-0.5 text-lg font-semibold text-weber-cream">
+                  {state.card.word}
+                </p>
+                <p className="mt-1 text-xs italic text-muted-foreground">
+                  {state.card.phonetic}
+                </p>
               </div>
-              <p className="font-heading text-[11px] uppercase tracking-wide text-weber-cream/70">
-                {state.card.language}
-              </p>
-              <p className="mt-0.5 text-lg font-semibold text-weber-cream">
-                {state.card.word}
-              </p>
-              <p className="mt-1 text-xs italic text-weber-cream/60">
-                {state.card.phonetic}
-              </p>
             </div>
           </div>
         )}
@@ -185,7 +205,8 @@ export function QrScanner() {
           </p>
           <Button
             onClick={resumeScanning}
-            className="h-12 w-full rounded-2xl font-heading uppercase tracking-wide"
+            variant="secondary"
+            className="h-12 w-full rounded-2xl border border-white/10 font-heading uppercase tracking-wide"
           >
             <RotateCcw className="size-4" />
             Scan Next Coaster

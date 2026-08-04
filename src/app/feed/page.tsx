@@ -33,24 +33,33 @@ export default async function FeedPage() {
   return (
     <div className="mx-auto flex max-w-md flex-col">
       {challenge ? (
-        <div className="bg-gradient-to-br from-[#1a1a1a] to-weber-black px-5 py-6 text-weber-cream">
-          <p className="mb-2 text-[10px] uppercase tracking-[0.15em] text-[#e8925f]">
-            This Month&apos;s Challenge
+        <div
+          className="rounded-b-3xl px-5 py-6 text-weber-cream"
+          style={{
+            background:
+              "linear-gradient(150deg, oklch(0.32 0.16 30), oklch(0.16 0.02 40))",
+          }}
+        >
+          <p className="mb-2 text-[11px] uppercase tracking-[0.12em] text-weber-cream/85">
+            🔥 This Month&apos;s Challenge
           </p>
           <p className="mb-4 font-heading text-lg font-bold leading-snug">
             {challenge.theme}
           </p>
-          <div className="flex items-center gap-2">
+          <div className="mb-4 flex gap-2">
             <ChallengeCountdown endsAt={challenge.ends_at} />
-            <Button
-              render={<Link href="/feed/new" />}
-              nativeButton={false}
-              size="sm"
-              className="ml-auto rounded-xl font-heading text-xs uppercase tracking-wide"
-            >
-              Enter
-            </Button>
           </div>
+          <Button
+            render={<Link href="/feed/new" />}
+            nativeButton={false}
+            className="w-full rounded-xl border-0 font-heading text-[13px] font-bold uppercase tracking-wide"
+            style={{
+              background: "var(--weber-white)",
+              color: "oklch(0.15 0.02 30)",
+            }}
+          >
+            Enter the Challenge
+          </Button>
         </div>
       ) : (
         <div className="bg-weber-black px-5 py-8 text-center text-weber-cream">

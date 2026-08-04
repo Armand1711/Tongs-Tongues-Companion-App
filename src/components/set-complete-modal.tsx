@@ -8,7 +8,9 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
+  DialogTrigger,
 } from "@/components/ui/dialog";
+import { emberBurst } from "@/components/ember-field";
 
 export function SetCompleteModal({
   itemSlug,
@@ -31,27 +33,60 @@ export function SetCompleteModal({
     }
   }, [itemSlug]);
 
+  function handleOpenChange(next: boolean) {
+    setOpen(next);
+    if (next) emberBurst(30);
+  }
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="rounded-2xl border-border">
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogTrigger
+        render={
+          <button
+            type="button"
+            className="flex w-full items-center justify-between rounded-2xl border p-[18px] text-left"
+            style={{
+              background: "var(--weber-black)",
+              borderColor: "oklch(0.72 0.19 45 / 40%)",
+            }}
+          />
+        }
+      >
+        <div>
+          <p className="font-heading text-[13px] font-semibold uppercase tracking-wide text-weber-ember">
+            Set Complete
+          </p>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            10% off unlocked at Weber retailers
+          </p>
+        </div>
+        <span className="text-xl text-muted-foreground">›</span>
+      </DialogTrigger>
+
+      <DialogContent
+        className="rounded-2xl border p-6 text-center"
+        style={{
+          background: "var(--card)",
+          borderColor: "oklch(0.72 0.19 45 / 30%)",
+        }}
+      >
         <DialogHeader className="items-center text-center">
           <div className="flex size-16 items-center justify-center rounded-full bg-primary text-primary-foreground animate-glow-pulse">
             <PartyPopper className="size-8" />
           </div>
           <DialogTitle className="font-heading text-2xl uppercase tracking-tight">
-            Coaster Set Complete!
+            Set Complete!
           </DialogTitle>
           <DialogDescription className="text-sm text-muted-foreground">
             You&apos;ve collected all five language coasters for {itemName}.
           </DialogDescription>
         </DialogHeader>
-        <div className="rounded-xl border border-dashed border-primary bg-primary/5 p-4 text-center">
-          <p className="font-heading text-xs uppercase tracking-wide text-primary">
-            Reward Unlocked
+        <div className="rounded-xl border-2 border-dashed border-primary/40 bg-primary/5 p-4 text-center">
+          <p className="font-heading text-xl font-bold text-weber-ember">
+            10% OFF
           </p>
-          <p className="mt-1 text-sm">
-            Show this screen at any Weber retailer for 10% off your next{" "}
-            {itemName.toLowerCase()} purchase.
+          <p className="mt-1 text-xs text-muted-foreground">
+            at any Weber retailer
           </p>
         </div>
       </DialogContent>
