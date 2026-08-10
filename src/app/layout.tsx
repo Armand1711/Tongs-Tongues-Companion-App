@@ -1,15 +1,9 @@
 import type { Metadata, Viewport } from "next";
-import { Oswald, Manrope } from "next/font/google";
+import { Manrope } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { BottomNav } from "@/components/bottom-nav";
 import { EmberField } from "@/components/ember-field";
-
-const heading = Oswald({
-  variable: "--font-heading",
-  subsets: ["latin"],
-  weight: ["500", "600", "700"],
-});
 
 const body = Manrope({
   variable: "--font-body",
@@ -24,7 +18,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0b0705",
+  themeColor: "#2a1a17",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
@@ -36,10 +30,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className={`${heading.variable} ${body.variable} h-full antialiased`}
-    >
+    <html lang="en" className={`${body.variable} h-full antialiased`}>
+      <head>
+        <link rel="stylesheet" href="https://use.typekit.net/wdk6adl.css" />
+      </head>
       <body className="min-h-full flex flex-col bg-background text-foreground">
         <EmberField />
         <main className="relative z-10 flex-1 pb-28">{children}</main>

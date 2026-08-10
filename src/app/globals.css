@@ -9,7 +9,7 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-body);
   --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-heading);
+  --font-heading: "futura-pt-bold", "futura-pt", var(--font-body), sans-serif;
   --color-weber-black: var(--weber-black);
   --color-weber-cream: var(--weber-cream);
   --color-weber-red: var(--weber-red);
@@ -57,25 +57,25 @@
 }
 
 :root {
-  /* Weber brand palette — dark ember/charcoal braai theme */
-  --weber-black: oklch(0.08 0.01 40);
-  --weber-cream: oklch(0.95 0.01 80);
-  --weber-red: oklch(0.63 0.2 35);
-  --weber-white: oklch(0.97 0.01 60);
+  /* Weber brand palette — exact brand sheet hex values */
+  --weber-black: #2a1a17;
+  --weber-cream: #f2f0e7;
+  --weber-red: #d44030;
+  --weber-white: #ffffff;
   --weber-border: oklch(1 0 0 / 8%);
-  --weber-ember: oklch(0.8 0.16 70);
-  --weber-ember-start: oklch(0.72 0.19 45);
-  --weber-ember-end: oklch(0.55 0.22 25);
+  --weber-ember: #cd4e34;
+  --weber-ember-start: var(--weber-red);
+  --weber-ember-end: var(--weber-ember);
 
-  --background: oklch(0.1 0.012 40);
+  --background: color-mix(in srgb, var(--weber-black) 92%, white);
   --foreground: var(--weber-cream);
-  --card: oklch(0.17 0.015 40);
+  --card: color-mix(in srgb, var(--weber-black) 74%, white);
   --card-foreground: var(--weber-cream);
-  --popover: oklch(0.17 0.015 40);
+  --popover: color-mix(in srgb, var(--weber-black) 74%, white);
   --popover-foreground: var(--weber-cream);
   --primary: var(--weber-ember-start);
-  --primary-foreground: oklch(0.98 0.01 60);
-  --secondary: oklch(0.2 0.015 40);
+  --primary-foreground: var(--weber-cream);
+  --secondary: color-mix(in srgb, var(--weber-black) 65%, white);
   --secondary-foreground: var(--weber-cream);
   --muted: oklch(1 0 0 / 6%);
   --muted-foreground: oklch(0.62 0.02 60);
@@ -91,10 +91,10 @@
   --chart-4: oklch(1 0 0 / 10%);
   --chart-5: var(--weber-white);
   --radius: 1rem;
-  --sidebar: oklch(0.17 0.015 40);
+  --sidebar: color-mix(in srgb, var(--weber-black) 74%, white);
   --sidebar-foreground: var(--weber-cream);
   --sidebar-primary: var(--weber-ember-start);
-  --sidebar-primary-foreground: oklch(0.98 0.01 60);
+  --sidebar-primary-foreground: var(--weber-cream);
   --sidebar-accent: oklch(1 0 0 / 8%);
   --sidebar-accent-foreground: var(--weber-cream);
   --sidebar-border: oklch(1 0 0 / 10%);
@@ -104,17 +104,17 @@
 .dark {
   --background: var(--weber-black);
   --foreground: var(--weber-cream);
-  --card: #171717;
+  --card: color-mix(in srgb, var(--weber-black) 80%, white);
   --card-foreground: var(--weber-cream);
-  --popover: #171717;
+  --popover: color-mix(in srgb, var(--weber-black) 80%, white);
   --popover-foreground: var(--weber-cream);
   --primary: var(--weber-red);
-  --primary-foreground: var(--weber-white);
+  --primary-foreground: var(--weber-cream);
   --secondary: var(--weber-cream);
   --secondary-foreground: var(--weber-black);
-  --muted: #262626;
+  --muted: color-mix(in srgb, var(--weber-black) 65%, white);
   --muted-foreground: #a3a099;
-  --accent: #262626;
+  --accent: color-mix(in srgb, var(--weber-black) 65%, white);
   --accent-foreground: var(--weber-cream);
   --destructive: var(--weber-red);
   --border: oklch(1 0 0 / 12%);
@@ -123,13 +123,13 @@
   --chart-1: var(--weber-red);
   --chart-2: var(--weber-cream);
   --chart-3: #a3a099;
-  --chart-4: #262626;
+  --chart-4: color-mix(in srgb, var(--weber-black) 65%, white);
   --chart-5: var(--weber-white);
-  --sidebar: #171717;
+  --sidebar: color-mix(in srgb, var(--weber-black) 80%, white);
   --sidebar-foreground: var(--weber-cream);
   --sidebar-primary: var(--weber-red);
-  --sidebar-primary-foreground: var(--weber-white);
-  --sidebar-accent: #262626;
+  --sidebar-primary-foreground: var(--weber-cream);
+  --sidebar-accent: color-mix(in srgb, var(--weber-black) 65%, white);
   --sidebar-accent-foreground: var(--weber-cream);
   --sidebar-border: oklch(1 0 0 / 12%);
   --sidebar-ring: var(--weber-red);
@@ -143,9 +143,9 @@
     @apply bg-background text-foreground;
     background-image: radial-gradient(
       120% 90% at 50% 0%,
-      oklch(0.2 0.03 40) 0%,
-      oklch(0.1 0.012 40) 55%,
-      oklch(0.08 0.01 40) 100%
+      color-mix(in srgb, var(--weber-black) 75%, white) 0%,
+      var(--background) 55%,
+      var(--weber-black) 100%
     );
     background-attachment: fixed;
   }
@@ -156,7 +156,7 @@
   h2,
   h3,
   h4 {
-    @apply font-heading uppercase tracking-tight;
+    @apply font-heading uppercase tracking-normal;
   }
 }
 
@@ -182,10 +182,10 @@
 @keyframes glow-pulse {
   0%,
   100% {
-    box-shadow: 0 0 0 0 oklch(0.7 0.19 45 / 55%);
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--weber-ember-start) 55%, transparent);
   }
   50% {
-    box-shadow: 0 0 0 14px oklch(0.7 0.19 45 / 0%);
+    box-shadow: 0 0 0 14px color-mix(in srgb, var(--weber-ember-start) 0%, transparent);
   }
 }
 
