@@ -213,6 +213,41 @@ export interface Database {
           }
         ];
       };
+      comments: {
+        Row: {
+          id: string;
+          post_id: string;
+          user_id: string;
+          display_name: string | null;
+          body: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          post_id: string;
+          user_id: string;
+          display_name?: string | null;
+          body: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          post_id?: string;
+          user_id?: string;
+          display_name?: string | null;
+          body?: string;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "comments_post_id_fkey";
+            columns: ["post_id"];
+            isOneToOne: false;
+            referencedRelation: "posts";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
     };
     Views: {
       posts_with_votes: {
@@ -264,5 +299,6 @@ export type Post = Tables<"posts">;
 export type Vote = Tables<"votes">;
 export type Challenge = Tables<"challenges">;
 export type VoucherCode = Tables<"voucher_codes">;
+export type Comment = Tables<"comments">;
 export type PostWithVotes = Views<"posts_with_votes">;
 export type HallOfFameEntry = Views<"hall_of_fame">;

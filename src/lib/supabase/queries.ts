@@ -5,6 +5,7 @@ import type {
   Challenge,
   PostWithVotes,
   HallOfFameEntry,
+  Comment,
 } from "@/lib/database.types";
 
 type TypedClient = SupabaseClient<Database>;
@@ -247,6 +248,22 @@ export async function getHallOfFame(
   return data;
 }
 
+export async function hasUserVoted(
+  supabase: TypedClient,
+  userId: string,
+  postId: string
+): Promise<boolean> {
+  const { data, error } = await supabase
+    .from("votes")
+    .select("id")
+    .eq("user_id", userId)
+    .eq("post_id", postId)
+    .maybeSingle();
+
+  if (error) throw error;
+  return data !== null;
+}
+
 export async function toggleVote(
   supabase: TypedClient,
   userId: string,
@@ -268,6 +285,54 @@ export async function toggleVote(
     .insert({ user_id: userId, post_id: postId });
   // unique_violation just means another tab already registered the vote — fine.
   if (error && error.code !== "23505") throw error;
+}
+
+// ============================================================================
+// FEATURE 3 — POST COMMENTS
+// ============================================================================
+
+export async function getPostById(
+  supabase: TypedClient,
+  postId: string
+): Promise<PostWithVotes | null> {
+  const { data, error } = await supabase
+    .from("posts_with_votes")
+    .select("*")
+    .eq("id", postId)
+    .maybeSingle();
+
+  if (error) throw error;
+  return data;
+}
+
+export async function getComments(
+  supabase: TypedClient,
+  postId: string
+): Promise<Comment[]> {
+  const { data, error } = await supabase
+    .from("comments")
+    .select("*")
+    .eq("post_id", postId)
+    .order("created_at", { ascending: true });
+
+  if (error) throw error;
+  return data;
+}
+
+export async function addComment(
+  supabase: TypedClient,
+  userId: string,
+  postId: string,
+  displayName: string,
+  body: string
+): Promise<void> {
+  const { error } = await supabase.from("comments").insert({
+    user_id: userId,
+    post_id: postId,
+    display_name: displayName || null,
+    body,
+  });
+  if (error) throw error;
 }
 
 export async function uploadBraaiPhoto(

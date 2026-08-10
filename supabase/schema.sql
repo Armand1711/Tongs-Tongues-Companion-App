@@ -279,3 +279,26 @@ select
   date_trunc('month', now()),
   (date_trunc('month', now()) + interval '1 month' - interval '1 second')
 where not exists (select 1 from public.challenges where status = 'active');
+
+create table if not exists public.comments (
+  id uuid primary key default gen_random_uuid(),
+  post_id uuid not null references public.posts (id) on delete cascade,
+  user_id uuid not null references auth.users (id) on delete cascade,
+  display_name text,
+  body text not null check (char_length(body) between 1 and 1000),
+  created_at timestamptz not null default now()
+);
+
+create index if not exists comments_post_id_idx on public.comments (post_id, created_at);
+
+alter table public.comments enable row level security;
+
+drop policy if exists "comments are readable by everyone" on public.comments;
+create policy "comments are readable by everyone"
+  on public.comments for select
+  using (true);
+
+drop policy if exists "users can insert own comments" on public.comments;
+create policy "users can insert own comments"
+  on public.comments for insert
+  with check (auth.uid() = user_id);

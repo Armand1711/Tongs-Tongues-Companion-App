@@ -40,8 +40,10 @@ export default async function HomePage() {
             Weber South Africa
           </p>
         </div>
-        <div
-          className="flex size-[46px] items-center justify-center rounded-full shadow-[0_0_20px_oklch(0.6_0.2_30_/_55%)]"
+        <Link
+          href="/account"
+          aria-label="Account"
+          className="flex size-[46px] items-center justify-center rounded-full shadow-[0_0_20px_oklch(0.6_0.2_30_/_55%)] transition-transform active:scale-95"
           style={{
             background:
               "conic-gradient(from 180deg, var(--weber-ember-start), var(--weber-ember-end), var(--weber-ember-start))",
@@ -50,7 +52,7 @@ export default async function HomePage() {
           <div className="flex size-[38px] items-center justify-center rounded-full bg-weber-black font-heading text-xs font-semibold tracking-wide text-weber-cream">
             T&amp;T
           </div>
-        </div>
+        </Link>
       </header>
 
       <section
