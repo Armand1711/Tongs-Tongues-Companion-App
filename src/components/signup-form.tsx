@@ -46,10 +46,13 @@ export function SignupForm() {
       const supabase = createClient();
       await ensureUser(supabase);
 
-      const { error } = await supabase.auth.updateUser({
-        email: emailResult.data,
-        password: passwordResult.data,
-      });
+      const { error } = await supabase.auth.updateUser(
+        {
+          email: emailResult.data,
+          password: passwordResult.data,
+        },
+        { emailRedirectTo: `${window.location.origin}/auth/confirm` }
+      );
       if (error) {
         toast.error(error.message);
         return;
