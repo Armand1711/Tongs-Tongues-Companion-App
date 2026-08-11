@@ -10,6 +10,7 @@
   --font-sans: var(--font-body);
   --font-mono: var(--font-geist-mono);
   --font-heading: "futura-pt-bold", "futura-pt", var(--font-body), sans-serif;
+  --font-brush: var(--font-brush), cursive;
   --color-weber-black: var(--weber-black);
   --color-weber-cream: var(--weber-cream);
   --color-weber-red: var(--weber-red);
@@ -57,48 +58,49 @@
 }
 
 :root {
-  /* Weber brand palette — exact brand sheet hex values */
-  --weber-black: #2a1a17;
-  --weber-cream: #f2f0e7;
-  --weber-red: #d44030;
+  /* Weber brand palette — matches the print campaign (cream/black/red poster
+     system): cream ground, near-black ink, brick-red flame accent. */
+  --weber-black: #201510;
+  --weber-cream: #f4efe1;
+  --weber-red: #cc3a26;
   --weber-white: #ffffff;
-  --weber-border: oklch(1 0 0 / 8%);
-  --weber-ember: #cd4e34;
-  --weber-ember-start: var(--weber-red);
-  --weber-ember-end: var(--weber-ember);
+  --weber-border: oklch(0.22 0.03 40 / 14%);
+  --weber-ember: #e0602f;
+  --weber-ember-start: #d8452f;
+  --weber-ember-end: #b32e1c;
 
-  --background: color-mix(in srgb, var(--weber-black) 92%, white);
-  --foreground: var(--weber-cream);
-  --card: color-mix(in srgb, var(--weber-black) 74%, white);
-  --card-foreground: var(--weber-cream);
-  --popover: color-mix(in srgb, var(--weber-black) 74%, white);
-  --popover-foreground: var(--weber-cream);
-  --primary: var(--weber-ember-start);
-  --primary-foreground: var(--weber-cream);
-  --secondary: color-mix(in srgb, var(--weber-black) 65%, white);
+  --background: var(--weber-cream);
+  --foreground: var(--weber-black);
+  --card: var(--weber-white);
+  --card-foreground: var(--weber-black);
+  --popover: var(--weber-white);
+  --popover-foreground: var(--weber-black);
+  --primary: var(--weber-red);
+  --primary-foreground: var(--weber-white);
+  --secondary: var(--weber-black);
   --secondary-foreground: var(--weber-cream);
-  --muted: oklch(1 0 0 / 6%);
-  --muted-foreground: oklch(0.62 0.02 60);
-  --accent: oklch(1 0 0 / 8%);
-  --accent-foreground: var(--weber-cream);
+  --muted: oklch(0.93 0.014 60);
+  --muted-foreground: oklch(0.46 0.02 50);
+  --accent: oklch(0.93 0.025 40);
+  --accent-foreground: var(--weber-black);
   --destructive: var(--weber-red);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 10%);
-  --ring: var(--weber-ember-start);
-  --chart-1: var(--weber-ember-start);
-  --chart-2: var(--weber-cream);
-  --chart-3: oklch(0.62 0.02 60);
-  --chart-4: oklch(1 0 0 / 10%);
+  --border: oklch(0.22 0.02 40 / 13%);
+  --input: oklch(0.22 0.02 40 / 17%);
+  --ring: var(--weber-red);
+  --chart-1: var(--weber-red);
+  --chart-2: var(--weber-black);
+  --chart-3: oklch(0.46 0.02 50);
+  --chart-4: oklch(0.22 0.02 40 / 17%);
   --chart-5: var(--weber-white);
   --radius: 1rem;
-  --sidebar: color-mix(in srgb, var(--weber-black) 74%, white);
-  --sidebar-foreground: var(--weber-cream);
-  --sidebar-primary: var(--weber-ember-start);
-  --sidebar-primary-foreground: var(--weber-cream);
-  --sidebar-accent: oklch(1 0 0 / 8%);
-  --sidebar-accent-foreground: var(--weber-cream);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: var(--weber-ember-start);
+  --sidebar: var(--weber-white);
+  --sidebar-foreground: var(--weber-black);
+  --sidebar-primary: var(--weber-red);
+  --sidebar-primary-foreground: var(--weber-white);
+  --sidebar-accent: oklch(0.93 0.025 40);
+  --sidebar-accent-foreground: var(--weber-black);
+  --sidebar-border: oklch(0.22 0.02 40 / 13%);
+  --sidebar-ring: var(--weber-red);
 }
 
 .dark {
@@ -142,10 +144,9 @@
   body {
     @apply bg-background text-foreground;
     background-image: radial-gradient(
-      120% 90% at 50% 0%,
-      color-mix(in srgb, var(--weber-black) 75%, white) 0%,
-      var(--background) 55%,
-      var(--weber-black) 100%
+      130% 55% at 50% -10%,
+      color-mix(in srgb, var(--weber-red) 9%, transparent) 0%,
+      transparent 60%
     );
     background-attachment: fixed;
   }
@@ -161,7 +162,46 @@
 }
 
 /* ---------------------------------------------------------------------- */
-/* Motion — coaster reveal, ember/celebration, countdown pulse            */
+/* Poster/campaign visual language — brush wordmark, sticker shadows,     */
+/* coaster frame                                                          */
+/* ---------------------------------------------------------------------- */
+
+.brand-wordmark {
+  font-family: var(--font-brush);
+  color: var(--weber-red);
+  text-shadow: 2px 2px 0 var(--weber-black);
+  letter-spacing: 0.01em;
+  line-height: 0.9;
+}
+
+.sticker-border {
+  border: 2px solid var(--weber-black);
+  box-shadow: 4px 4px 0 0 var(--weber-black);
+}
+
+.btn-sticker {
+  border: 2px solid var(--weber-black);
+  box-shadow: 4px 4px 0 0 var(--weber-black);
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.btn-sticker:active {
+  transform: translate(3px, 3px);
+  box-shadow: 1px 1px 0 0 var(--weber-black);
+}
+
+.coaster-shape {
+  border-radius: 26px;
+}
+
+.coaster-frame {
+  border: 3px solid var(--weber-black);
+}
+
+/* ---------------------------------------------------------------------- */
+/* Motion — coaster reveal, celebration, countdown pulse                  */
 /* ---------------------------------------------------------------------- */
 
 @keyframes coaster-drop {
@@ -182,10 +222,10 @@
 @keyframes glow-pulse {
   0%,
   100% {
-    box-shadow: 0 0 0 0 color-mix(in srgb, var(--weber-ember-start) 55%, transparent);
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--weber-red) 45%, transparent);
   }
   50% {
-    box-shadow: 0 0 0 14px color-mix(in srgb, var(--weber-ember-start) 0%, transparent);
+    box-shadow: 0 0 0 14px color-mix(in srgb, var(--weber-red) 0%, transparent);
   }
 }
 
@@ -219,30 +259,6 @@
   }
 }
 
-@keyframes flame-flicker {
-  0%,
-  100% {
-    opacity: 0.55;
-    transform: scaleX(1) scaleY(1) translateX(0);
-  }
-  20% {
-    opacity: 0.7;
-    transform: scaleX(1.08) scaleY(1.15) translateX(-3px);
-  }
-  45% {
-    opacity: 0.45;
-    transform: scaleX(0.92) scaleY(0.95) translateX(4px);
-  }
-  65% {
-    opacity: 0.65;
-    transform: scaleX(1.05) scaleY(1.1) translateX(-2px);
-  }
-  85% {
-    opacity: 0.5;
-    transform: scaleX(0.96) scaleY(1.02) translateX(2px);
-  }
-}
-
 @keyframes scanline {
   0% {
     transform: translateY(0);
@@ -268,10 +284,6 @@
   animation: tick-pulse 2s ease-in-out infinite;
 }
 
-.animate-flame-flicker {
-  animation: flame-flicker 2.6s ease-in-out infinite;
-}
-
 .animate-scanline {
   animation: scanline 1.4s ease-in-out infinite alternate;
 }
@@ -289,27 +301,16 @@
   animation: ember-sweep 3s linear infinite;
 }
 
-.coaster-shape {
-  clip-path: polygon(
-    30% 0%,
-    70% 0%,
-    100% 30%,
-    100% 70%,
-    70% 100%,
-    30% 100%,
-    0% 70%,
-    0% 30%
-  );
-}
-
 @media (prefers-reduced-motion: reduce) {
   .animate-coaster-drop,
   .animate-glow-pulse,
   .animate-ember-rise,
   .animate-tick-pulse,
-  .animate-flame-flicker,
   .animate-scanline,
   .progress-ember-fill {
     animation: none !important;
+  }
+  .btn-sticker:active {
+    transform: none;
   }
 }

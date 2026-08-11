@@ -88,11 +88,7 @@ export function CommentForm({ postId }: { postId: string }) {
       <Button
         type="submit"
         disabled={submitting}
-        className="self-end rounded-xl border-0 font-heading text-xs font-bold uppercase tracking-wide"
-        style={{
-          background:
-            "linear-gradient(135deg, var(--weber-ember-start), var(--weber-ember-end))",
-        }}
+        className="btn-sticker self-end rounded-xl bg-primary font-heading text-xs font-bold uppercase tracking-wide text-primary-foreground"
       >
         {submitting && <Loader2 className="size-4 animate-spin" />}
         {submitting ? "Posting..." : "Post Comment"}

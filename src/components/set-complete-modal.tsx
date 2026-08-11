@@ -44,11 +44,7 @@ export function SetCompleteModal({
         render={
           <button
             type="button"
-            className="flex w-full items-center justify-between rounded-2xl border p-[18px] text-left"
-            style={{
-              background: "var(--weber-black)",
-              borderColor: "oklch(0.72 0.19 45 / 40%)",
-            }}
+            className="sticker-border flex w-full items-center justify-between rounded-2xl bg-weber-black p-[18px] text-left"
           />
         }
       >
@@ -56,20 +52,14 @@ export function SetCompleteModal({
           <p className="font-heading text-[13px] font-semibold uppercase tracking-wide text-weber-ember">
             Set Complete
           </p>
-          <p className="mt-0.5 text-xs text-muted-foreground">
+          <p className="mt-0.5 text-xs text-weber-cream/60">
             10% off unlocked at Weber retailers
           </p>
         </div>
-        <span className="text-xl text-muted-foreground">›</span>
+        <span className="text-xl text-weber-cream/60">›</span>
       </DialogTrigger>
 
-      <DialogContent
-        className="rounded-2xl border p-6 text-center"
-        style={{
-          background: "var(--card)",
-          borderColor: "oklch(0.72 0.19 45 / 30%)",
-        }}
-      >
+      <DialogContent className="sticker-border rounded-2xl bg-card p-6 text-center">
         <DialogHeader className="items-center text-center">
           <div className="flex size-16 items-center justify-center rounded-full bg-primary text-primary-foreground animate-glow-pulse">
             <PartyPopper className="size-8" />

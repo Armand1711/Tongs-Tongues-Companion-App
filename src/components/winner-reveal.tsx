@@ -38,7 +38,7 @@ export function WinnerReveal({
         Congratulations — you topped &ldquo;{theme}&rdquo;
       </p>
 
-      <div className="mb-4 rounded-2xl border-2 border-dashed border-primary bg-card p-5">
+      <div className="sticker-border mb-4 rounded-2xl border-2 border-dashed border-primary bg-card p-5">
         <p className="mb-2 text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
           Voucher Code
         </p>
@@ -48,7 +48,7 @@ export function WinnerReveal({
         <button
           type="button"
           onClick={copyCode}
-          className="rounded-[10px] bg-weber-black px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-weber-cream"
+          className="btn-sticker rounded-[10px] bg-weber-black px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-weber-cream"
         >
           {copied ? "Copied ✓" : "Copy Code"}
         </button>
@@ -59,7 +59,7 @@ export function WinnerReveal({
 
       <Link
         href="/feed"
-        className="block w-full rounded-2xl border border-border py-3.5 text-center font-heading text-[13px] font-semibold uppercase tracking-wide text-foreground"
+        className="sticker-border block w-full rounded-2xl bg-card py-3.5 text-center font-heading text-[13px] font-semibold uppercase tracking-wide text-foreground"
       >
         Back to Challenge
       </Link>

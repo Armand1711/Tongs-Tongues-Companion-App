@@ -23,7 +23,7 @@ export default async function NewEntryPage() {
           Your Entry
         </h1>
         {challenge && (
-          <p className="inline-block rounded-full bg-white/8 px-3 py-1.5 text-xs text-muted-foreground">
+          <p className="inline-block rounded-full bg-primary/10 px-3 py-1.5 text-xs text-primary">
             🔥 {challenge.theme}
           </p>
         )}

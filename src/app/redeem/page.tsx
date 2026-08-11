@@ -22,7 +22,7 @@ export default async function RedeemPage() {
       </header>
 
       {voucher && (
-        <div className="rounded-2xl border border-primary/35 bg-weber-black p-4 text-center text-weber-cream">
+        <div className="sticker-border rounded-2xl bg-weber-black p-4 text-center text-weber-cream">
           <p className="mb-1.5 text-[11px] uppercase tracking-[0.15em] text-muted-foreground">
             Active Voucher
           </p>

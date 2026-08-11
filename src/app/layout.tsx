@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Manrope } from "next/font/google";
+import { Manrope, Permanent_Marker } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { BottomNav } from "@/components/bottom-nav";
@@ -11,6 +11,12 @@ const body = Manrope({
   weight: ["400", "500", "600", "700", "800"],
 });
 
+const brush = Permanent_Marker({
+  variable: "--font-brush",
+  subsets: ["latin"],
+  weight: ["400"],
+});
+
 export const metadata: Metadata = {
   title: "Tongs & Tongues | Weber South Africa",
   description:
@@ -18,7 +24,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#2a1a17",
+  themeColor: "#f4efe1",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
@@ -30,7 +36,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${body.variable} h-full antialiased`}>
+    <html
+      lang="en"
+      className={`${body.variable} ${brush.variable} h-full antialiased`}
+    >
       <head>
         <link rel="stylesheet" href="https://use.typekit.net/wdk6adl.css" />
       </head>

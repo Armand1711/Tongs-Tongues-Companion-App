@@ -43,7 +43,7 @@ function CountdownUnit({
   pulse?: boolean;
 }) {
   return (
-    <div className="flex-1 rounded-xl bg-black/25 px-1 py-2 text-center">
+    <div className="flex-1 rounded-xl bg-white/10 px-1 py-2 text-center">
       <div
         className={`font-heading text-lg font-bold ${pulse ? "animate-tick-pulse" : ""}`}
       >

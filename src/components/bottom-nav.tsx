@@ -21,10 +21,7 @@ export function BottomNav() {
 
   return (
     <nav className="fixed inset-x-4 bottom-5 z-50 mx-auto max-w-md">
-      <ul
-        className="flex items-center justify-around rounded-[24px] border border-white/10 px-2 py-2.5 shadow-[0_10px_30px_rgba(0,0,0,0.4)] backdrop-blur-2xl"
-        style={{ background: "oklch(0.14 0.012 40 / 78%)" }}
-      >
+      <ul className="sticker-border flex items-center justify-around rounded-[24px] bg-card px-2 py-2.5">
         {NAV_ITEMS.map(({ href, label, icon: Icon }, index) => {
           const isActive = index === activeIndex;
 
@@ -37,14 +34,14 @@ export function BottomNav() {
                 <span
                   className={cn(
                     "flex h-[30px] w-10 items-center justify-center rounded-xl transition-colors duration-200",
-                    isActive && "bg-primary/20"
+                    isActive && "bg-primary/12"
                   )}
                 >
                   <Icon
                     className={cn(
                       "size-[18px] transition-transform duration-200",
                       isActive
-                        ? "scale-110 text-weber-ember"
+                        ? "scale-110 text-primary"
                         : "text-muted-foreground"
                     )}
                     strokeWidth={isActive ? 2.5 : 2}

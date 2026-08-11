@@ -22,8 +22,9 @@ interface Particle {
   wobbleAmp: number;
 }
 
-const AMBIENT_MAX = 42;
-
+// Embers only ever appear as a celebration burst (coaster collect, set
+// complete, winner reveal) — no idle/ambient haze over the cream campaign
+// background.
 export function EmberField() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const particlesRef = useRef<Particle[]>([]);
@@ -46,23 +47,6 @@ export function EmberField() {
     resize();
     window.addEventListener("resize", resize);
 
-    function spawnAmbient(): Particle {
-      const w = canvas!.width;
-      const h = canvas!.height;
-      return {
-        x: w * 0.5 + (Math.random() - 0.5) * w * 0.9,
-        y: h + 6 + Math.random() * 20,
-        vx: (Math.random() - 0.5) * 0.2,
-        vy: -(0.6 + Math.random() * 1.1),
-        size: 0.9 + Math.random() * 2,
-        life: 1,
-        decay: 0.0035 + Math.random() * 0.006,
-        wobble: Math.random() * Math.PI * 2,
-        wobbleSpeed: 0.04 + Math.random() * 0.06,
-        wobbleAmp: 0.4 + Math.random() * 0.9,
-      };
-    }
-
     function spawnBurst(): Particle {
       const w = canvas!.width;
       const h = canvas!.height;
@@ -71,7 +55,7 @@ export function EmberField() {
         y: h * 0.55 + (Math.random() - 0.5) * 60,
         vx: (Math.random() - 0.5) * 1.2,
         vy: -(2 + Math.random() * 3.5),
-        size: 1.4 + Math.random() * 2.8,
+        size: 1.8 + Math.random() * 3.2,
         life: 1,
         decay: 0.007 + Math.random() * 0.011,
         wobble: Math.random() * Math.PI * 2,
@@ -99,11 +83,7 @@ export function EmberField() {
         particlesRef.current.push(spawnBurst());
         burstBudgetRef.current -= 1;
       }
-      while (particlesRef.current.length < AMBIENT_MAX) {
-        particlesRef.current.push(spawnAmbient());
-      }
 
-      ctx.globalCompositeOperation = "lighter";
       for (const p of particlesRef.current) {
         p.vy *= 0.992;
         p.wobble += p.wobbleSpeed;
@@ -111,16 +91,16 @@ export function EmberField() {
         p.y += p.vy;
         p.life -= p.decay;
 
-        const alpha = Math.max(0, p.life * 0.85);
+        const alpha = Math.max(0, p.life * 0.9);
         const heat = Math.max(0, p.life);
-        const hue = 12 + heat * 40;
-        const light = 45 + heat * 25;
+        const hue = 14 + heat * 20;
+        const light = 42 + heat * 14;
         const size = p.size * (0.6 + heat * 0.6);
 
         ctx.beginPath();
-        ctx.shadowBlur = 10;
-        ctx.shadowColor = `hsla(${hue}, 95%, ${light}%, ${alpha})`;
-        ctx.fillStyle = `hsla(${hue}, 95%, ${light}%, ${alpha})`;
+        ctx.shadowBlur = 6;
+        ctx.shadowColor = `hsla(${hue}, 80%, ${light}%, ${alpha * 0.6})`;
+        ctx.fillStyle = `hsla(${hue}, 80%, ${light}%, ${alpha})`;
         ctx.arc(p.x, p.y, size, 0, Math.PI * 2);
         ctx.fill();
       }
@@ -144,23 +124,7 @@ export function EmberField() {
 
   return (
     <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
-      <div
-        className="animate-flame-flicker absolute -inset-x-[20%] -bottom-[10%] h-[46%] blur-[6px]"
-        style={{
-          background:
-            "radial-gradient(60% 100% at 50% 100%, oklch(0.55 0.2 45 / 65%) 0%, oklch(0.45 0.2 30 / 40%) 35%, transparent 70%)",
-        }}
-      />
-      <div
-        className="animate-flame-flicker absolute inset-x-[10%] -bottom-[10%] h-[30%] blur-[4px]"
-        style={{
-          background:
-            "radial-gradient(50% 100% at 50% 100%, oklch(0.8 0.17 70 / 55%) 0%, transparent 70%)",
-          animationDirection: "reverse",
-          animationDuration: "1.7s",
-        }}
-      />
-      <canvas ref={canvasRef} className="absolute inset-0 size-full opacity-95" />
+      <canvas ref={canvasRef} className="absolute inset-0 size-full" />
     </div>
   );
 }

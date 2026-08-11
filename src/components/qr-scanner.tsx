@@ -114,7 +114,7 @@ export function QrScanner() {
 
   return (
     <div className="flex flex-col items-center gap-4">
-      <div className="relative aspect-square w-full max-w-sm overflow-hidden rounded-[28px] border border-white/10 bg-weber-black">
+      <div className="sticker-border relative aspect-square w-full max-w-sm overflow-hidden rounded-[28px] bg-weber-black">
         <div id={elementId} ref={containerRef} className="size-full [&_video]:size-full [&_video]:object-cover" />
 
         {state.status === "scanning" && (
@@ -154,22 +154,10 @@ export function QrScanner() {
         )}
 
         {state.status === "result" && revealStyle && (
-          <div className="absolute inset-0 flex items-center justify-center bg-weber-black/95 p-6">
+          <div className="absolute inset-0 flex items-center justify-center bg-weber-black/90 p-6">
             <div className="animate-coaster-drop relative size-48">
-              <div
-                className="coaster-shape absolute inset-0"
-                style={{
-                  background: revealStyle.badgeBg,
-                  filter: `drop-shadow(0 0 32px ${revealStyle.badgeBg})`,
-                }}
-              />
-              <div
-                className="coaster-shape absolute inset-[6px] flex flex-col items-center justify-center gap-1 text-center"
-                style={{
-                  background:
-                    "radial-gradient(circle at 35% 30%, oklch(0.3 0.05 45), oklch(0.12 0.012 40) 70%)",
-                }}
-              >
+              <div className="coaster-shape coaster-frame sticker-border absolute inset-0 bg-card" />
+              <div className="coaster-shape absolute inset-[7px] flex flex-col items-center justify-center gap-1 border-2 border-dashed border-weber-black/20 text-center">
                 <div
                   className="mb-1.5 flex size-11 items-center justify-center rounded-full font-heading text-sm font-semibold text-weber-black"
                   style={{ background: revealStyle.badgeBg }}
@@ -179,7 +167,7 @@ export function QrScanner() {
                 <p className="font-heading text-[11px] uppercase tracking-wide text-muted-foreground">
                   {state.card.language}
                 </p>
-                <p className="mt-0.5 text-lg font-semibold text-weber-cream">
+                <p className="mt-0.5 text-lg font-semibold text-foreground">
                   {state.card.word}
                 </p>
                 <p className="mt-1 text-xs italic text-muted-foreground">
@@ -206,7 +194,7 @@ export function QrScanner() {
           <Button
             onClick={resumeScanning}
             variant="secondary"
-            className="h-12 w-full rounded-2xl border border-white/10 font-heading uppercase tracking-wide"
+            className="btn-sticker h-12 w-full rounded-2xl font-heading uppercase tracking-wide"
           >
             <RotateCcw className="size-4" />
             Scan Next Coaster

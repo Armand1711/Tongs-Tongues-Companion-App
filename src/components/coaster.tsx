@@ -47,16 +47,7 @@ export function Coaster({
         className="relative size-56 [perspective:1200px]"
       >
         {!selected.unlocked ? (
-          <div className="relative flex size-full flex-col items-center justify-center gap-1">
-            <svg viewBox="0 0 100 100" className="absolute inset-0 size-full">
-              <polygon
-                points="30,0 70,0 100,30 100,70 70,100 30,100 0,70 0,30"
-                fill="none"
-                stroke="var(--border)"
-                strokeWidth="3"
-                strokeDasharray="6 5"
-              />
-            </svg>
+          <div className="coaster-shape relative flex size-full flex-col items-center justify-center gap-1 border-[3px] border-dashed border-weber-black/25 bg-card/60">
             <p className="font-heading text-xs uppercase tracking-wide text-muted-foreground">
               Locked
             </p>
@@ -72,27 +63,15 @@ export function Coaster({
           >
             {/* front */}
             <div className="absolute inset-0 [backface-visibility:hidden]">
-              <div
-                className="coaster-shape absolute inset-0"
-                style={{
-                  background: badgeBg,
-                  filter: `drop-shadow(0 0 28px ${badgeBg})`,
-                }}
-              />
-              <div
-                className="coaster-shape absolute inset-[7px] flex flex-col items-center justify-center gap-2.5"
-                style={{
-                  background:
-                    "radial-gradient(circle at 35% 28%, oklch(0.3 0.05 45), oklch(0.12 0.012 40) 70%)",
-                }}
-              >
+              <div className="coaster-shape coaster-frame sticker-border absolute inset-0 bg-card" />
+              <div className="coaster-shape absolute inset-[8px] flex flex-col items-center justify-center gap-2.5 border-2 border-dashed border-weber-black/20">
                 <div
                   className="flex size-14 items-center justify-center rounded-full font-heading text-[17px] font-semibold text-weber-black"
                   style={{ background: badgeBg }}
                 >
                   {mono}
                 </div>
-                <p className="font-heading text-xs uppercase tracking-wide text-weber-cream">
+                <p className="font-heading text-xs uppercase tracking-wide text-foreground">
                   {selected.label}
                 </p>
                 <p className="text-[10px] uppercase tracking-[0.08em] text-muted-foreground">
@@ -106,25 +85,18 @@ export function Coaster({
               className="absolute inset-0 [backface-visibility:hidden]"
               style={{ transform: "rotateY(180deg)" }}
             >
+              <div className="coaster-shape coaster-frame sticker-border absolute inset-0 bg-primary" />
               <div
-                className="coaster-shape absolute inset-0"
-                style={{
-                  background: "var(--weber-ember-start)",
-                  filter:
-                    "drop-shadow(0 0 28px var(--weber-ember-start))",
-                }}
-              />
-              <div
-                className="coaster-shape absolute inset-[7px] flex flex-col items-center justify-center gap-2 px-5 text-center"
+                className="coaster-shape absolute inset-[8px] flex flex-col items-center justify-center gap-2 border-2 border-dashed border-weber-white/40 px-5 text-center"
                 style={{
                   background:
-                    "repeating-linear-gradient(45deg, oklch(0.16 0.014 40), oklch(0.16 0.014 40) 8px, oklch(0.19 0.016 40) 8px, oklch(0.19 0.016 40) 16px)",
+                    "repeating-linear-gradient(45deg, color-mix(in srgb, var(--weber-red) 92%, black), color-mix(in srgb, var(--weber-red) 92%, black) 8px, var(--weber-red) 8px, var(--weber-red) 16px)",
                 }}
               >
-                <p className="font-heading text-2xl font-bold tracking-wide text-weber-cream/90 italic">
+                <p className="font-heading text-2xl font-bold tracking-wide text-weber-white italic">
                   {selected.word}
                 </p>
-                <p className="font-mono text-xs text-muted-foreground">
+                <p className="font-mono text-xs text-weber-cream/80">
                   {selected.phonetic}
                 </p>
               </div>
@@ -149,7 +121,7 @@ export function Coaster({
             className="size-2.5 rounded-full transition-colors"
             style={{
               background:
-                index === selectedIndex ? badgeBg : "oklch(1 0 0 / 12%)",
+                index === selectedIndex ? badgeBg : "oklch(0.22 0.02 40 / 16%)",
               boxShadow:
                 index === selectedIndex ? `0 0 8px ${badgeBg}` : "none",
             }}

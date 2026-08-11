@@ -67,14 +67,14 @@ export default async function CollectionPage() {
                       style={
                         unlocked
                           ? {
-                              background: `oklch(0.55 0.15 ${style.hue} / 30%)`,
-                              border: `1px solid oklch(0.55 0.15 ${style.hue} / 70%)`,
-                              color: "oklch(0.9 0.02 60)",
+                              background: `oklch(0.55 0.15 ${style.hue} / 22%)`,
+                              border: `1px solid oklch(0.55 0.15 ${style.hue} / 65%)`,
+                              color: "var(--weber-black)",
                             }
                           : {
-                              background: "oklch(1 0 0 / 4%)",
-                              border: "1px dashed oklch(1 0 0 / 15%)",
-                              color: "oklch(0.45 0.01 60)",
+                              background: "oklch(0.22 0.02 40 / 4%)",
+                              border: "1px dashed oklch(0.22 0.02 40 / 20%)",
+                              color: "oklch(0.55 0.02 50)",
                             }
                       }
                     >
