@@ -18,8 +18,8 @@ export async function getAllCards(supabase: TypedClient): Promise<Card[]> {
   const { data, error } = await supabase
     .from("cards")
     .select("*")
-    .order("item_slug", { ascending: true })
-    .order("language_code", { ascending: true });
+    .order("language_code", { ascending: true })
+    .order("item_slug", { ascending: true });
 
   if (error) throw error;
   return data;
@@ -38,38 +38,38 @@ export async function getCollectedCardIds(
   return new Set(data.map((row) => row.card_id));
 }
 
-export interface ItemProgress {
-  itemSlug: string;
-  itemName: string;
+export interface LanguageProgress {
+  languageCode: string;
+  language: string;
   collected: number;
   total: number;
 }
 
-// Groups all 25 cards by item and cross-references against what this user
-// has collected, in a single pass — avoids a round trip per item.
-export function summarizeByItem(
+// Groups all 9 cards by language and cross-references against what this
+// user has collected, in a single pass — avoids a round trip per language.
+export function summarizeByLanguage(
   cards: Card[],
   collectedIds: Set<string>
-): ItemProgress[] {
-  const byItem = new Map<string, ItemProgress>();
+): LanguageProgress[] {
+  const byLanguage = new Map<string, LanguageProgress>();
 
   for (const card of cards) {
-    const existing = byItem.get(card.item_slug);
+    const existing = byLanguage.get(card.language_code);
     const isCollected = collectedIds.has(card.id);
     if (existing) {
       existing.total += 1;
       if (isCollected) existing.collected += 1;
     } else {
-      byItem.set(card.item_slug, {
-        itemSlug: card.item_slug,
-        itemName: card.item_name,
+      byLanguage.set(card.language_code, {
+        languageCode: card.language_code,
+        language: card.language,
         total: 1,
         collected: isCollected ? 1 : 0,
       });
     }
   }
 
-  return Array.from(byItem.values());
+  return Array.from(byLanguage.values());
 }
 
 export async function getCardById(

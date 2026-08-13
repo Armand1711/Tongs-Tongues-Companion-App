@@ -1,13 +1,23 @@
-// Placeholder braai traditions/foods — swap the slugs and item_name values
-// (here and in supabase/schema.sql) once the real 3 coaster themes and
-// phrases are ready.
-export const ITEM_ORDER = ["tradition-1", "tradition-2", "tradition-3"] as const;
-
-export type ItemSlug = (typeof ITEM_ORDER)[number];
-
+// The 9 coasters are 3 independent braai phrases per language, not one
+// concept translated 3 ways — so language is the grouping unit (collect all
+// 3 in a language to complete that set), not a shared item across languages.
 export const LANGUAGE_ORDER = ["ZU", "XH", "AF"] as const;
 
-export const TOTAL_CARDS = ITEM_ORDER.length * LANGUAGE_ORDER.length;
+export type LanguageCode = (typeof LANGUAGE_ORDER)[number];
+
+export const LANGUAGE_INFO: Record<LanguageCode, { label: string; slug: string }> = {
+  ZU: { label: "Zulu", slug: "zulu" },
+  XH: { label: "Xhosa", slug: "xhosa" },
+  AF: { label: "Afrikaans", slug: "afrikaans" },
+};
+
+export function languageSlugToCode(slug: string): LanguageCode | undefined {
+  return LANGUAGE_ORDER.find((code) => LANGUAGE_INFO[code].slug === slug);
+}
+
+export const COASTERS_PER_LANGUAGE = 3;
+
+export const TOTAL_CARDS = LANGUAGE_ORDER.length * COASTERS_PER_LANGUAGE;
 
 export interface Retailer {
   name: string;

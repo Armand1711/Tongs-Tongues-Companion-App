@@ -235,33 +235,40 @@ join public.challenges c on c.id = vc.challenge_id
 join public.posts p on p.id = vc.post_id
 order by c.ends_at desc;
 
--- Card catalog trimmed to 3 braai traditions/foods x 3 languages (Zulu,
--- Xhosa, Afrikaans) per the campaign brief — down from the earlier 5x5
--- product-name catalog. Real theme names and phrases are pending; this
--- removes the old rows and reseeds placeholders ready to be replaced.
+-- Real card catalog: 9 independent braai-phrase coasters, 3 per language
+-- (Zulu, Xhosa, Afrikaans) — not one concept translated 3 ways, so
+-- item_slug is now unique per coaster rather than shared across languages.
+-- item_name holds the dish shown on the coaster; `word` is the phrase as
+-- lettered on the art; `phonetic` is repurposed to hold an English gloss of
+-- the phrase (best-effort translation — confirm/correct before print).
+-- image_url points at the source art copied into public/coasters/.
 delete from public.cards
-where item_slug not in ('tradition-1', 'tradition-2', 'tradition-3')
-   or language_code not in ('ZU', 'XH', 'AF');
+where item_slug not in (
+  'zulu-kumnandi', 'zulu-kungithinta', 'zulu-iyavaya',
+  'xhosa-mncwaa', 'xhosa-phuma-phambili', 'xhosa-lumnandi',
+  'afrikaans-engel-piepie', 'afrikaans-jy-lyk-so-lekker', 'afrikaans-koue-een'
+);
 
-insert into public.cards (id, item_name, item_slug, language, language_code, word, phonetic) values
-  ('TR1-ZU', 'Tradition 1', 'tradition-1', 'Zulu', 'ZU', 'Add phrase', 'add phonetic'),
-  ('TR1-XH', 'Tradition 1', 'tradition-1', 'Xhosa', 'XH', 'Add phrase', 'add phonetic'),
-  ('TR1-AF', 'Tradition 1', 'tradition-1', 'Afrikaans', 'AF', 'Add phrase', 'add phonetic'),
+insert into public.cards (id, item_name, item_slug, language, language_code, word, phonetic, image_url) values
+  ('ZU-01', 'Pap & Chakalaka', 'zulu-kumnandi', 'Zulu', 'ZU', 'Kumnandi! Kumnandi! Kumnandi!', 'It''s delicious! It''s delicious! It''s delicious!', '/coasters/zulu-kumnandi.jpg'),
+  ('ZU-02', 'Sunday Plate', 'zulu-kungithinta', 'Zulu', 'ZU', 'Kungithinta Ngaphakathi!', 'It touches me on the inside!', '/coasters/zulu-kungithinta.jpg'),
+  ('ZU-03', 'Pap & Braai Meat', 'zulu-iyavaya', 'Zulu', 'ZU', 'IyaVaya', 'It''s popping / it''s going off', '/coasters/zulu-iyavaya.jpg'),
 
-  ('TR2-ZU', 'Tradition 2', 'tradition-2', 'Zulu', 'ZU', 'Add phrase', 'add phonetic'),
-  ('TR2-XH', 'Tradition 2', 'tradition-2', 'Xhosa', 'XH', 'Add phrase', 'add phonetic'),
-  ('TR2-AF', 'Tradition 2', 'tradition-2', 'Afrikaans', 'AF', 'Add phrase', 'add phonetic'),
+  ('XH-01', 'Steamed Bread & Beans', 'xhosa-mncwaa', 'Xhosa', 'XH', 'Mncwaa! Mncwaa!', 'Nom nom! (the sound of eating with relish)', '/coasters/xhosa-mncwaa.jpg'),
+  ('XH-02', 'Umngqusho (Samp)', 'xhosa-phuma-phambili', 'Xhosa', 'XH', 'Yho, Phuma Phambili!', 'Whoa, come out on top!', '/coasters/xhosa-phuma-phambili.jpg'),
+  ('XH-03', 'Pap & Tripe', 'xhosa-lumnandi', 'Xhosa', 'XH', 'Lumnandi!', 'It''s delicious!', '/coasters/xhosa-lumnandi.jpg'),
 
-  ('TR3-ZU', 'Tradition 3', 'tradition-3', 'Zulu', 'ZU', 'Add phrase', 'add phonetic'),
-  ('TR3-XH', 'Tradition 3', 'tradition-3', 'Xhosa', 'XH', 'Add phrase', 'add phonetic'),
-  ('TR3-AF', 'Tradition 3', 'tradition-3', 'Afrikaans', 'AF', 'Add phrase', 'add phonetic')
+  ('AF-01', 'Steak Sandwich', 'afrikaans-engel-piepie', 'Afrikaans', 'AF', 'Joh! Smaak Soos Engel Piepie!', 'Whoa! Tastes like angel wee! (i.e. amazing)', '/coasters/afrikaans-engel-piepie.jpg'),
+  ('AF-02', 'Braai Chicken', 'afrikaans-jy-lyk-so-lekker', 'Afrikaans', 'AF', 'Jy Lyk So Lekker', 'You look so delicious', '/coasters/afrikaans-jy-lyk-so-lekker.jpg'),
+  ('AF-03', 'Brandy & Coke', 'afrikaans-koue-een', 'Afrikaans', 'AF', 'Tyd vir ''n Koue Een!', 'Time for a cold one!', '/coasters/afrikaans-koue-een.jpg')
 on conflict (id) do update set
   item_name = excluded.item_name,
   item_slug = excluded.item_slug,
   language = excluded.language,
   language_code = excluded.language_code,
   word = excluded.word,
-  phonetic = excluded.phonetic;
+  phonetic = excluded.phonetic,
+  image_url = excluded.image_url;
 
 insert into public.challenges (theme, starts_at, ends_at)
 select

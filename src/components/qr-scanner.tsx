@@ -1,14 +1,15 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
+import Image from "next/image";
 import { toast } from "sonner";
 import { CameraOff, RotateCcw } from "lucide-react";
 import { createClient, ensureUser } from "@/lib/supabase/client";
 import { collectCard, getCardById } from "@/lib/supabase/queries";
 import { Button } from "@/components/ui/button";
-import { COASTER_STYLES } from "@/lib/coasters";
+import { LANGUAGE_STYLES } from "@/lib/coasters";
 import { emberBurst } from "@/components/ember-field";
-import type { ItemSlug } from "@/lib/constants";
+import type { LanguageCode } from "@/lib/constants";
 import type { Card as CardData } from "@/lib/database.types";
 
 type ScanState =
@@ -109,7 +110,7 @@ export function QrScanner() {
 
   const revealStyle =
     state.status === "result"
-      ? COASTER_STYLES[state.card.item_slug as ItemSlug]
+      ? LANGUAGE_STYLES[state.card.language_code as LanguageCode]
       : null;
 
   return (
@@ -155,22 +156,29 @@ export function QrScanner() {
 
         {state.status === "result" && revealStyle && (
           <div className="absolute inset-0 flex items-center justify-center bg-weber-black/90 p-6">
-            <div className="animate-coaster-drop relative size-48">
-              <div className="coaster-shape coaster-frame sticker-border absolute inset-0 bg-card" />
-              <div className="coaster-shape absolute inset-[7px] flex flex-col items-center justify-center gap-1 border-2 border-dashed border-weber-black/20 text-center">
-                <div
-                  className="mb-1.5 flex size-11 items-center justify-center rounded-full font-heading text-sm font-semibold text-weber-black"
+            <div className="animate-coaster-drop coaster-shape coaster-frame sticker-border relative w-full max-w-[240px] overflow-hidden bg-card text-center">
+              {state.card.image_url && (
+                <div className="relative aspect-square w-full">
+                  <Image
+                    src={state.card.image_url}
+                    alt={state.card.item_name}
+                    fill
+                    className="object-cover"
+                    sizes="240px"
+                  />
+                </div>
+              )}
+              <div className="flex flex-col items-center gap-1 p-4">
+                <span
+                  className="rounded-full px-2 py-0.5 font-heading text-[10px] font-semibold text-weber-black"
                   style={{ background: revealStyle.badgeBg }}
                 >
-                  {revealStyle.mono}
-                </div>
-                <p className="font-heading text-[11px] uppercase tracking-wide text-muted-foreground">
                   {state.card.language}
-                </p>
-                <p className="mt-0.5 text-lg font-semibold text-foreground">
+                </span>
+                <p className="mt-1 text-base font-semibold text-foreground">
                   {state.card.word}
                 </p>
-                <p className="mt-1 text-xs italic text-muted-foreground">
+                <p className="text-xs italic text-muted-foreground">
                   {state.card.phonetic}
                 </p>
               </div>

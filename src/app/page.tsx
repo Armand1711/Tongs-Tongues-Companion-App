@@ -5,10 +5,10 @@ import {
   getAllCards,
   getCollectedCardIds,
   getActiveChallenge,
-  summarizeByItem,
+  summarizeByLanguage,
 } from "@/lib/supabase/queries";
-import { ITEM_ORDER, LANGUAGE_ORDER, TOTAL_CARDS } from "@/lib/constants";
-import { COASTER_STYLES } from "@/lib/coasters";
+import { LANGUAGE_ORDER, LANGUAGE_INFO, TOTAL_CARDS } from "@/lib/constants";
+import { LANGUAGE_STYLES } from "@/lib/coasters";
 import { Button } from "@/components/ui/button";
 import { FlameGraphic } from "@/components/flame-graphic";
 
@@ -24,8 +24,8 @@ export default async function HomePage() {
     getActiveChallenge(supabase),
   ]);
 
-  const progressBySlug = new Map(
-    summarizeByItem(cards, collectedIds).map((p) => [p.itemSlug, p])
+  const progressByLanguage = new Map(
+    summarizeByLanguage(cards, collectedIds).map((p) => [p.languageCode, p])
   );
   const collectedCount = collectedIds.size;
   const progressPct = Math.round((collectedCount / TOTAL_CARDS) * 100);
@@ -83,31 +83,31 @@ export default async function HomePage() {
 
       <section>
         <p className="mb-3 font-heading text-[13px] uppercase tracking-wide text-foreground">
-          Your Rack
+          Your Languages
         </p>
         <div className="grid grid-cols-2 gap-3">
-          {ITEM_ORDER.map((slug) => {
-            const progress = progressBySlug.get(slug);
+          {LANGUAGE_ORDER.map((code) => {
+            const progress = progressByLanguage.get(code);
             const unlockedCount = progress?.collected ?? 0;
-            const style = COASTER_STYLES[slug];
+            const style = LANGUAGE_STYLES[code];
 
             return (
               <Link
-                key={slug}
-                href={`/collection/${slug}`}
+                key={code}
+                href={`/collection/${LANGUAGE_INFO[code].slug}`}
                 className="sticker-border rounded-2xl bg-card p-3.5 transition-transform active:scale-[0.97]"
               >
                 <div
                   className="flex size-10 items-center justify-center rounded-xl font-heading text-[13px] font-semibold text-weber-black"
                   style={{ background: style.badgeBg }}
                 >
-                  {style.mono}
+                  {code}
                 </div>
                 <p className="mt-2.5 font-heading text-[13px] font-semibold uppercase tracking-wide text-foreground">
-                  {progress?.itemName ?? slug}
+                  {LANGUAGE_INFO[code].label}
                 </p>
                 <p className="mt-0.5 text-[11px] text-muted-foreground">
-                  {unlockedCount}/{LANGUAGE_ORDER.length} languages
+                  {unlockedCount}/3 coasters
                 </p>
               </Link>
             );

@@ -13,25 +13,26 @@ import {
 import { emberBurst } from "@/components/ember-field";
 
 export function SetCompleteModal({
-  itemSlug,
-  itemName,
+  languageCode,
+  languageLabel,
 }: {
-  itemSlug: string;
-  itemName: string;
+  languageCode: string;
+  languageLabel: string;
 }) {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
     // One-time read of an external system (localStorage) to decide whether
-    // this device has already seen the reward for this item — not derivable
-    // from render-time state, so an effect (not derived state) is correct here.
-    const seenKey = `tt-set-complete-seen:${itemSlug}`;
+    // this device has already seen the reward for this language set — not
+    // derivable from render-time state, so an effect (not derived state) is
+    // correct here.
+    const seenKey = `tt-set-complete-seen:${languageCode}`;
     if (!localStorage.getItem(seenKey)) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setOpen(true);
       localStorage.setItem(seenKey, "1");
     }
-  }, [itemSlug]);
+  }, [languageCode]);
 
   function handleOpenChange(next: boolean) {
     setOpen(next);
@@ -68,7 +69,7 @@ export function SetCompleteModal({
             Set Complete!
           </DialogTitle>
           <DialogDescription className="text-sm text-muted-foreground">
-            You&apos;ve collected all the language coasters for {itemName}.
+            You&apos;ve collected the full {languageLabel} coaster set.
           </DialogDescription>
         </DialogHeader>
         <div className="rounded-xl border-2 border-dashed border-primary/40 bg-primary/5 p-4 text-center">

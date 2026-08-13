@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { getAllCards, getCollectedCardIds } from "@/lib/supabase/queries";
-import { ITEM_ORDER, TOTAL_CARDS, type ItemSlug } from "@/lib/constants";
-import { COASTER_STYLES } from "@/lib/coasters";
+import { LANGUAGE_ORDER, LANGUAGE_INFO, TOTAL_CARDS } from "@/lib/constants";
+import { LANGUAGE_STYLES } from "@/lib/coasters";
 import { PageHeader } from "@/components/page-header";
 
 export default async function CollectionPage() {
@@ -27,17 +27,16 @@ export default async function CollectionPage() {
       />
 
       <div className="flex flex-col gap-3">
-        {ITEM_ORDER.map((slug) => {
-          const itemCards = cards
-            .filter((card) => card.item_slug === slug)
-            .sort((a, b) => a.language_code.localeCompare(b.language_code));
-          const itemName = itemCards[0]?.item_name ?? slug;
-          const style = COASTER_STYLES[slug as ItemSlug];
+        {LANGUAGE_ORDER.map((code) => {
+          const langCards = cards
+            .filter((card) => card.language_code === code)
+            .sort((a, b) => a.item_slug.localeCompare(b.item_slug));
+          const style = LANGUAGE_STYLES[code];
 
           return (
             <Link
-              key={slug}
-              href={`/collection/${slug}`}
+              key={code}
+              href={`/collection/${LANGUAGE_INFO[code].slug}`}
               className="sticker-border rounded-2xl bg-card p-4 transition-transform active:scale-[0.98]"
             >
               <div className="mb-3 flex items-center justify-between">
@@ -46,22 +45,22 @@ export default async function CollectionPage() {
                     className="flex size-8 items-center justify-center rounded-[10px] font-heading text-[11px] font-semibold text-weber-black"
                     style={{ background: style.badgeBg }}
                   >
-                    {style.mono}
+                    {code}
                   </div>
                   <p className="font-heading text-sm uppercase tracking-wide text-foreground">
-                    {itemName}
+                    {LANGUAGE_INFO[code].label}
                   </p>
                 </div>
                 <span className="text-xs text-muted-foreground">View ›</span>
               </div>
 
               <div className="flex gap-2">
-                {itemCards.map((card) => {
+                {langCards.map((card) => {
                   const unlocked = collectedIds.has(card.id);
                   return (
                     <div
                       key={card.id}
-                      className="flex h-9 flex-1 items-center justify-center rounded-[10px] text-[10px] font-bold"
+                      className="flex h-9 flex-1 items-center justify-center rounded-[10px] px-1 text-center text-[10px] font-bold"
                       style={
                         unlocked
                           ? {
@@ -76,7 +75,7 @@ export default async function CollectionPage() {
                             }
                       }
                     >
-                      {unlocked ? card.language_code : "·"}
+                      {unlocked ? card.item_name : "·"}
                     </div>
                   );
                 })}
