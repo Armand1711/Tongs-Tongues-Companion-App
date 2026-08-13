@@ -19,7 +19,7 @@ export function LeaderboardRow({
     entry.rank === 1 ? "text-primary" : entry.rank <= 3 ? "text-weber-ember" : "text-muted-foreground";
 
   return (
-    <div className="mb-2.5 flex items-center gap-3 rounded-2xl border border-border bg-card p-3">
+    <div className="sticker-border mb-3 flex items-center gap-3 rounded-2xl bg-card p-3">
       <Link
         href={`/feed/${entry.id}`}
         className="flex min-w-0 flex-1 items-center gap-3"

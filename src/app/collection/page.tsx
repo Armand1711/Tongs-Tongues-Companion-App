@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getAllCards, getCollectedCardIds } from "@/lib/supabase/queries";
 import { ITEM_ORDER, TOTAL_CARDS, type ItemSlug } from "@/lib/constants";
 import { COASTER_STYLES } from "@/lib/coasters";
+import { PageHeader } from "@/components/page-header";
 
 export default async function CollectionPage() {
   const supabase = await createClient();
@@ -19,14 +20,11 @@ export default async function CollectionPage() {
 
   return (
     <div className="mx-auto flex max-w-md flex-col gap-6 px-4 pt-10">
-      <header className="space-y-1">
-        <h1 className="font-heading text-xl font-bold uppercase tracking-tight">
-          Coaster Rack
-        </h1>
-        <p className="text-[13px] text-muted-foreground">
-          {collectedCount} of {TOTAL_CARDS} coasters collected
-        </p>
-      </header>
+      <PageHeader
+        title="Coaster Rack"
+        subtitle={`${collectedCount} of ${TOTAL_CARDS} coasters collected`}
+        watermark
+      />
 
       <div className="flex flex-col gap-3">
         {ITEM_ORDER.map((slug) => {
@@ -40,7 +38,7 @@ export default async function CollectionPage() {
             <Link
               key={slug}
               href={`/collection/${slug}`}
-              className="rounded-2xl border border-border bg-card p-4"
+              className="sticker-border rounded-2xl bg-card p-4 transition-transform active:scale-[0.98]"
             >
               <div className="mb-3 flex items-center justify-between">
                 <div className="flex items-center gap-2.5">

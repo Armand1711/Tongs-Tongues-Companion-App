@@ -235,36 +235,26 @@ join public.challenges c on c.id = vc.challenge_id
 join public.posts p on p.id = vc.post_id
 order by c.ends_at desc;
 
+-- Card catalog trimmed to 3 braai traditions/foods x 3 languages (Zulu,
+-- Xhosa, Afrikaans) per the campaign brief — down from the earlier 5x5
+-- product-name catalog. Real theme names and phrases are pending; this
+-- removes the old rows and reseeds placeholders ready to be replaced.
+delete from public.cards
+where item_slug not in ('tradition-1', 'tradition-2', 'tradition-3')
+   or language_code not in ('ZU', 'XH', 'AF');
+
 insert into public.cards (id, item_name, item_slug, language, language_code, word, phonetic) values
-  ('CHR-ZU', 'Charcoal', 'charcoal', 'Zulu', 'ZU', 'Amalahle', 'ah-mah-DLAH-shleh'),
-  ('CHR-XH', 'Charcoal', 'charcoal', 'Xhosa', 'XH', 'Amalahle', 'ah-mah-HLAH-hleh'),
-  ('CHR-AF', 'Charcoal', 'charcoal', 'Afrikaans', 'AF', 'Houtskool', 'HOYT-skoal'),
-  ('CHR-SO', 'Charcoal', 'charcoal', 'Sesotho', 'SO', 'Malaha', 'mah-LAH-hah'),
-  ('CHR-TS', 'Charcoal', 'charcoal', 'Setswana', 'TS', 'Malahe', 'mah-LAH-heh'),
+  ('TR1-ZU', 'Tradition 1', 'tradition-1', 'Zulu', 'ZU', 'Add phrase', 'add phonetic'),
+  ('TR1-XH', 'Tradition 1', 'tradition-1', 'Xhosa', 'XH', 'Add phrase', 'add phonetic'),
+  ('TR1-AF', 'Tradition 1', 'tradition-1', 'Afrikaans', 'AF', 'Add phrase', 'add phonetic'),
 
-  ('KET-ZU', 'Kettle', 'kettle', 'Zulu', 'ZU', 'Iketela', 'ee-keh-TEH-lah'),
-  ('KET-XH', 'Kettle', 'kettle', 'Xhosa', 'XH', 'Iketile', 'ee-keh-TEE-leh'),
-  ('KET-AF', 'Kettle', 'kettle', 'Afrikaans', 'AF', 'Ketel', 'KEE-tel'),
-  ('KET-SO', 'Kettle', 'kettle', 'Sesotho', 'SO', 'Ketlele', 'keht-LEH-leh'),
-  ('KET-TS', 'Kettle', 'kettle', 'Setswana', 'TS', 'Ketlele', 'keht-LEH-leh'),
+  ('TR2-ZU', 'Tradition 2', 'tradition-2', 'Zulu', 'ZU', 'Add phrase', 'add phonetic'),
+  ('TR2-XH', 'Tradition 2', 'tradition-2', 'Xhosa', 'XH', 'Add phrase', 'add phonetic'),
+  ('TR2-AF', 'Tradition 2', 'tradition-2', 'Afrikaans', 'AF', 'Add phrase', 'add phonetic'),
 
-  ('TNG-ZU', 'Tongs', 'tongs', 'Zulu', 'ZU', 'Udlawu', 'oo-DLAH-woo'),
-  ('TNG-XH', 'Tongs', 'tongs', 'Xhosa', 'XH', 'Idlawu', 'ee-DLAH-woo'),
-  ('TNG-AF', 'Tongs', 'tongs', 'Afrikaans', 'AF', 'Tang', 'tung'),
-  ('TNG-SO', 'Tongs', 'tongs', 'Sesotho', 'SO', 'Sekhoele', 'seh-KHWEH-leh'),
-  ('TNG-TS', 'Tongs', 'tongs', 'Setswana', 'TS', 'Sekgokelo', 'seh-kho-KEH-loh'),
-
-  ('APR-ZU', 'Apron', 'apron', 'Zulu', 'ZU', 'Ifasikoti', 'ee-fah-see-KOH-tee'),
-  ('APR-XH', 'Apron', 'apron', 'Xhosa', 'XH', 'Ifaskoti', 'ee-fah-SKOH-tee'),
-  ('APR-AF', 'Apron', 'apron', 'Afrikaans', 'AF', 'Voorskoot', 'FOHR-skoht'),
-  ('APR-SO', 'Apron', 'apron', 'Sesotho', 'SO', 'Aporone', 'ah-poh-ROH-neh'),
-  ('APR-TS', 'Apron', 'apron', 'Setswana', 'TS', 'Aporone', 'ah-poh-ROH-neh'),
-
-  ('CHM-ZU', 'Chimney Starter', 'chimney-starter', 'Zulu', 'ZU', 'Isilulu Somlilo', 'ee-see-LOO-loo som-DLEE-loh'),
-  ('CHM-XH', 'Chimney Starter', 'chimney-starter', 'Xhosa', 'XH', 'Isitya Somlilo', 'ee-SEE-tyah som-LEE-loh'),
-  ('CHM-AF', 'Chimney Starter', 'chimney-starter', 'Afrikaans', 'AF', 'Aanmaker', 'AHN-mah-ker'),
-  ('CHM-SO', 'Chimney Starter', 'chimney-starter', 'Sesotho', 'SO', 'Sethuseletsi sa Mollo', 'seh-too-seh-LEHT-see sah MOH-loh'),
-  ('CHM-TS', 'Chimney Starter', 'chimney-starter', 'Setswana', 'TS', 'Sesimolodi sa Molelo', 'seh-see-moh-LOH-dee sah moh-LEH-loh')
+  ('TR3-ZU', 'Tradition 3', 'tradition-3', 'Zulu', 'ZU', 'Add phrase', 'add phonetic'),
+  ('TR3-XH', 'Tradition 3', 'tradition-3', 'Xhosa', 'XH', 'Add phrase', 'add phonetic'),
+  ('TR3-AF', 'Tradition 3', 'tradition-3', 'Afrikaans', 'AF', 'Add phrase', 'add phonetic')
 on conflict (id) do update set
   item_name = excluded.item_name,
   item_slug = excluded.item_slug,
@@ -275,7 +265,7 @@ on conflict (id) do update set
 
 insert into public.challenges (theme, starts_at, ends_at)
 select
-  'Post your braai with your Kettle coaster in the shot',
+  'Post your braai with your coaster in the shot',
   date_trunc('month', now()),
   (date_trunc('month', now()) + interval '1 month' - interval '1 second')
 where not exists (select 1 from public.challenges where status = 'active');

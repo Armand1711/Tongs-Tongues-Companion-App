@@ -1,12 +1,11 @@
 import { notFound } from "next/navigation";
-import Link from "next/link";
-import { ChevronLeft } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { getAllCards, getCollectedCardIds } from "@/lib/supabase/queries";
 import { ITEM_ORDER, type ItemSlug } from "@/lib/constants";
 import { COASTER_STYLES } from "@/lib/coasters";
 import { Coaster } from "@/components/coaster";
 import { SetCompleteModal } from "@/components/set-complete-modal";
+import { PageHeader } from "@/components/page-header";
 
 export default async function ItemDetailPage({
   params,
@@ -60,22 +59,12 @@ export default async function ItemDetailPage({
 
   return (
     <div className="mx-auto flex max-w-md flex-col gap-6 px-4 pt-10">
-      <Link
-        href="/collection"
-        className="inline-flex items-center gap-1 text-[13px] text-muted-foreground"
-      >
-        <ChevronLeft className="size-4" />
-        Rack
-      </Link>
-
-      <header className="space-y-1">
-        <h1 className="font-heading text-xl font-bold uppercase tracking-tight">
-          {itemName}
-        </h1>
-        <p className="text-[13px] text-muted-foreground">
-          {collectedCount}/{itemCards.length} languages collected
-        </p>
-      </header>
+      <PageHeader
+        title={itemName}
+        subtitle={`${collectedCount}/${itemCards.length} languages collected`}
+        back={{ href: "/collection", label: "Rack" }}
+        watermark
+      />
 
       <Coaster
         languages={languages}

@@ -7,7 +7,7 @@ import {
   getActiveChallenge,
   summarizeByItem,
 } from "@/lib/supabase/queries";
-import { ITEM_ORDER, TOTAL_CARDS } from "@/lib/constants";
+import { ITEM_ORDER, LANGUAGE_ORDER, TOTAL_CARDS } from "@/lib/constants";
 import { COASTER_STYLES } from "@/lib/coasters";
 import { Button } from "@/components/ui/button";
 import { FlameGraphic } from "@/components/flame-graphic";
@@ -107,7 +107,7 @@ export default async function HomePage() {
                   {progress?.itemName ?? slug}
                 </p>
                 <p className="mt-0.5 text-[11px] text-muted-foreground">
-                  {unlockedCount}/5 languages
+                  {unlockedCount}/{LANGUAGE_ORDER.length} languages
                 </p>
               </Link>
             );

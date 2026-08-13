@@ -92,7 +92,7 @@ export function NewEntryForm({ challengeId }: { challengeId: string }) {
         <button
           type="button"
           onClick={() => fileInputRef.current?.click()}
-          className="relative flex aspect-square w-full items-center justify-center overflow-hidden rounded-2xl border border-dashed border-border bg-muted/40"
+          className="relative flex aspect-square w-full items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-weber-black/25 bg-card"
         >
           {previewUrl ? (
             // local blob: preview URL — next/image's optimizer can't fetch it

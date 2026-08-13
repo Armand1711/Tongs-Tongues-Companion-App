@@ -1,8 +1,7 @@
-import Link from "next/link";
-import { ChevronLeft } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { getActiveChallenge } from "@/lib/supabase/queries";
 import { NewEntryForm } from "@/components/new-entry-form";
+import { PageHeader } from "@/components/page-header";
 
 export default async function NewEntryPage() {
   const supabase = await createClient();
@@ -10,24 +9,13 @@ export default async function NewEntryPage() {
 
   return (
     <div className="mx-auto flex max-w-md flex-col gap-6 px-4 pt-10">
-      <Link
-        href="/feed"
-        className="inline-flex items-center gap-1 text-[13px] text-muted-foreground"
-      >
-        <ChevronLeft className="size-4" />
-        Challenge
-      </Link>
+      <PageHeader title="Your Entry" back={{ href: "/feed", label: "Challenge" }} />
 
-      <header className="space-y-3">
-        <h1 className="font-heading text-xl font-bold uppercase tracking-tight">
-          Your Entry
-        </h1>
-        {challenge && (
-          <p className="inline-block rounded-full bg-primary/10 px-3 py-1.5 text-xs text-primary">
-            🔥 {challenge.theme}
-          </p>
-        )}
-      </header>
+      {challenge && (
+        <p className="sticker-border inline-block w-fit rounded-full bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary">
+          🔥 {challenge.theme}
+        </p>
+      )}
 
       {challenge ? (
         <NewEntryForm challengeId={challenge.id} />

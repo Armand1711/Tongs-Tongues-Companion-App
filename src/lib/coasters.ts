@@ -2,8 +2,7 @@ import type { ItemSlug } from "@/lib/constants";
 
 // Per-item coaster styling — monogram + rim/badge color shown on the
 // coaster face before it's flipped, matching the physical coaster concept
-// (cork back, item-colored rim) instead of a generic rectangular card.
-// Hues match the ember-charcoal palette's per-item accent (oklch hue angle).
+// instead of a generic rectangular card.
 export interface CoasterStyle {
   mono: string;
   hue: number;
@@ -15,9 +14,7 @@ function hueColor(hue: number) {
 }
 
 export const COASTER_STYLES: Record<ItemSlug, CoasterStyle> = {
-  charcoal: { mono: "CH", hue: 30, badgeBg: hueColor(30) },
-  kettle: { mono: "KE", hue: 200, badgeBg: hueColor(200) },
-  tongs: { mono: "TO", hue: 280, badgeBg: hueColor(280) },
-  apron: { mono: "AP", hue: 340, badgeBg: hueColor(340) },
-  "chimney-starter": { mono: "CS", hue: 100, badgeBg: hueColor(100) },
+  "tradition-1": { mono: "T1", hue: 30, badgeBg: hueColor(30) },
+  "tradition-2": { mono: "T2", hue: 200, badgeBg: hueColor(200) },
+  "tradition-3": { mono: "T3", hue: 340, badgeBg: hueColor(340) },
 };

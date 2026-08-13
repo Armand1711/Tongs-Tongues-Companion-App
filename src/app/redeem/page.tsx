@@ -2,6 +2,7 @@ import { MapPin, Phone, Clock } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { getMyLatestVoucher } from "@/lib/supabase/queries";
 import { RETAILERS } from "@/lib/constants";
+import { PageHeader } from "@/components/page-header";
 
 export default async function RedeemPage() {
   const supabase = await createClient();
@@ -12,14 +13,11 @@ export default async function RedeemPage() {
 
   return (
     <div className="mx-auto flex max-w-md flex-col gap-6 px-4 pt-10">
-      <header className="space-y-1">
-        <h1 className="font-heading text-xl font-bold uppercase tracking-tight">
-          Redeem
-        </h1>
-        <p className="text-[13px] text-muted-foreground">
-          Show your reward code in-store, or a completed coaster set.
-        </p>
-      </header>
+      <PageHeader
+        title="Redeem"
+        subtitle="Show your reward code in-store, or a completed coaster set."
+        watermark
+      />
 
       {voucher && (
         <div className="sticker-border rounded-2xl bg-weber-black p-4 text-center text-weber-cream">
@@ -36,7 +34,7 @@ export default async function RedeemPage() {
         {RETAILERS.map((retailer) => (
           <div
             key={`${retailer.name}-${retailer.suburb}`}
-            className="rounded-2xl border border-border bg-card p-5 shadow-sm"
+            className="sticker-border rounded-2xl bg-card p-5"
           >
             <p className="font-heading text-lg uppercase tracking-tight">
               {retailer.name}

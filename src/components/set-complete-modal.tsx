@@ -68,7 +68,7 @@ export function SetCompleteModal({
             Set Complete!
           </DialogTitle>
           <DialogDescription className="text-sm text-muted-foreground">
-            You&apos;ve collected all five language coasters for {itemName}.
+            You&apos;ve collected all the language coasters for {itemName}.
           </DialogDescription>
         </DialogHeader>
         <div className="rounded-xl border-2 border-dashed border-primary/40 bg-primary/5 p-4 text-center">

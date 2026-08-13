@@ -20,7 +20,7 @@ const brush = Permanent_Marker({
 export const metadata: Metadata = {
   title: "Tongs & Tongues | Weber South Africa",
   description:
-    "Collect Weber braai coasters, learn the words for your braai gear in five South African languages, and enter the monthly braai challenge to win a Weber voucher.",
+    "Collect Weber braai coasters celebrating braai traditions and food in three South African languages, and enter the monthly braai challenge to win a Weber voucher.",
 };
 
 export const viewport: Viewport = {

@@ -77,7 +77,7 @@ export default async function FeedPage() {
 
       <div className="px-5 pt-4 pb-2">
         {leaderboard.length === 0 ? (
-          <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-border p-10 text-center">
+          <div className="flex flex-col items-center gap-3 rounded-2xl border-2 border-dashed border-weber-black/20 p-10 text-center">
             <Flame className="size-8 text-muted-foreground" />
             <p className="text-sm text-muted-foreground">
               No entries yet — be the first to enter this month&apos;s challenge.

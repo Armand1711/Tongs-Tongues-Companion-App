@@ -1,14 +1,11 @@
-export const ITEM_ORDER = [
-  "charcoal",
-  "kettle",
-  "tongs",
-  "apron",
-  "chimney-starter",
-] as const;
+// Placeholder braai traditions/foods — swap the slugs and item_name values
+// (here and in supabase/schema.sql) once the real 3 coaster themes and
+// phrases are ready.
+export const ITEM_ORDER = ["tradition-1", "tradition-2", "tradition-3"] as const;
 
 export type ItemSlug = (typeof ITEM_ORDER)[number];
 
-export const LANGUAGE_ORDER = ["ZU", "XH", "AF", "SO", "TS"] as const;
+export const LANGUAGE_ORDER = ["ZU", "XH", "AF"] as const;
 
 export const TOTAL_CARDS = ITEM_ORDER.length * LANGUAGE_ORDER.length;
 
