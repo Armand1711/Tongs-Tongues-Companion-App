@@ -272,7 +272,7 @@ on conflict (id) do update set
 
 insert into public.challenges (theme, starts_at, ends_at)
 select
-  'Post your braai with your coaster in the shot',
+  'Teach us your Kumnandi — post your braai, caption it with your coaster''s phrase, and tell us what it means in English.',
   date_trunc('month', now()),
   (date_trunc('month', now()) + interval '1 month' - interval '1 second')
 where not exists (select 1 from public.challenges where status = 'active');
