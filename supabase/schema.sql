@@ -258,7 +258,7 @@ insert into public.cards (id, item_name, item_slug, language, language_code, wor
   ('XH-02', 'Umngqusho (Samp)', 'xhosa-phuma-phambili', 'Xhosa', 'XH', 'Yho, Phuma Phambili!', 'Whoa, come out on top!', '/coasters/xhosa-phuma-phambili.jpg'),
   ('XH-03', 'Pap & Tripe', 'xhosa-lumnandi', 'Xhosa', 'XH', 'Lumnandi!', 'It''s delicious!', '/coasters/xhosa-lumnandi.jpg'),
 
-  ('AF-01', 'Steak Sandwich', 'afrikaans-engel-piepie', 'Afrikaans', 'AF', 'Joh! Smaak Soos Engel Piepie!', 'Whoa! Tastes like angel wee! (i.e. amazing)', '/coasters/afrikaans-engel-piepie.jpg'),
+  ('AF-01', 'Barbecue Sandwich', 'afrikaans-engel-piepie', 'Afrikaans', 'AF', 'Joh! Smaak Soos Engel Piepie!', 'Whoa! Tastes like angel wee! (i.e. amazing)', '/coasters/afrikaans-engel-piepie.jpg'),
   ('AF-02', 'Braai Chicken', 'afrikaans-jy-lyk-so-lekker', 'Afrikaans', 'AF', 'Jy Lyk So Lekker', 'You look so delicious', '/coasters/afrikaans-jy-lyk-so-lekker.jpg'),
   ('AF-03', 'Brandy & Coke', 'afrikaans-koue-een', 'Afrikaans', 'AF', 'Tyd vir ''n Koue Een!', 'Time for a cold one!', '/coasters/afrikaans-koue-een.jpg')
 on conflict (id) do update set

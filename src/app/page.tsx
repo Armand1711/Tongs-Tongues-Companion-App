@@ -52,6 +52,20 @@ export default async function HomePage() {
         </Link>
       </header>
 
+      {user?.is_anonymous && (
+        <Link
+          href="/signup"
+          className="btn-sticker flex items-center justify-between gap-3 rounded-2xl bg-card px-4 py-3 transition-transform active:scale-[0.98]"
+        >
+          <p className="text-[13px] font-medium text-foreground">
+            Browsing as a guest —{" "}
+            <span className="text-primary">create an account</span> to save
+            your progress
+          </p>
+          <ArrowRight className="size-4 shrink-0 text-primary" />
+        </Link>
+      )}
+
       <section className="sticker-border relative overflow-hidden rounded-3xl bg-weber-black p-[22px] text-weber-cream">
         <FlameGraphic className="pointer-events-none absolute -right-6 -bottom-10 h-40 w-40 text-white/5" />
         <div className="relative mb-3 flex items-baseline justify-between">

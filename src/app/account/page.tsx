@@ -26,6 +26,11 @@ export default async function AccountPage() {
       {isSignedIn ? (
         <div className="sticker-border flex flex-col gap-4 rounded-2xl bg-card p-5">
           <div>
+            {user!.user_metadata?.display_name && (
+              <p className="mb-2.5 font-heading text-lg uppercase tracking-tight text-foreground">
+                {user!.user_metadata.display_name}
+              </p>
+            )}
             <p className="text-xs uppercase tracking-wide text-muted-foreground">
               Signed in as
             </p>
@@ -39,10 +44,12 @@ export default async function AccountPage() {
         <div className="sticker-border flex flex-col gap-4 rounded-2xl bg-card p-5 text-center">
           <p className="text-sm text-foreground">
             You&apos;re browsing as a guest — your coasters and entries are
-            saved to this device only.
+            saved to this device only, and disappear if you clear your
+            browser data.
           </p>
           <p className="text-sm text-muted-foreground">
-            Create an account to save your progress across devices.
+            Create an account and everything you&apos;ve already done here
+            moves with you — nothing resets.
           </p>
           <div className="flex flex-col gap-2.5 pt-1">
             <Button

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -24,6 +24,16 @@ export function CommentForm({ postId }: { postId: string }) {
   const [displayName, setDisplayName] = useState("");
   const [body, setBody] = useState("");
   const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    // Prefill from the account's saved name (set at signup) — guests still
+    // get a blank field since they haven't set one.
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      const savedName = user?.user_metadata?.display_name;
+      if (savedName) setDisplayName(savedName);
+    });
+  }, []);
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();

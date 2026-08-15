@@ -96,6 +96,12 @@ export function LoginForm() {
           Create an account
         </Link>
       </p>
+
+      <p className="rounded-xl bg-muted px-3 py-2.5 text-center text-[11px] text-muted-foreground">
+        Heads up: logging in switches to that account. Any coasters or
+        entries collected as a guest on this device stay with the guest
+        session — sign up instead if you want to keep them.
+      </p>
     </form>
   );
 }

@@ -15,9 +15,15 @@ const emailSchema = z.string().trim().email("Enter a valid email address.");
 const passwordSchema = z
   .string()
   .min(6, "Password must be at least 6 characters.");
+const nameSchema = z
+  .string()
+  .trim()
+  .min(1, "Tell us what to call you.")
+  .max(60, "Keep your name under 60 characters.");
 
 export function SignupForm() {
   const router = useRouter();
+  const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -26,6 +32,11 @@ export function SignupForm() {
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
 
+    const nameResult = nameSchema.safeParse(displayName);
+    if (!nameResult.success) {
+      toast.error(nameResult.error.issues[0].message);
+      return;
+    }
     const emailResult = emailSchema.safeParse(email);
     if (!emailResult.success) {
       toast.error(emailResult.error.issues[0].message);
@@ -44,12 +55,16 @@ export function SignupForm() {
     setSubmitting(true);
     try {
       const supabase = createClient();
+      // Upgrading the existing anonymous session (not a fresh sign-up) is
+      // what keeps this device's user_id — and everything keyed to it
+      // (collected coasters, challenge entries, comments, votes) — intact.
       await ensureUser(supabase);
 
       const { error } = await supabase.auth.updateUser(
         {
           email: emailResult.data,
           password: passwordResult.data,
+          data: { display_name: nameResult.data },
         },
         { emailRedirectTo: `${window.location.origin}/auth/confirm` }
       );
@@ -79,6 +94,22 @@ export function SignupForm() {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="displayName">Your name</Label>
+        <Input
+          id="displayName"
+          autoComplete="name"
+          value={displayName}
+          onChange={(event) => setDisplayName(event.target.value)}
+          placeholder="Braai Fan"
+          maxLength={60}
+        />
+        <p className="text-xs text-muted-foreground">
+          Shown on your challenge entries and comments — no more typing it
+          every time.
+        </p>
+      </div>
+
       <div className="flex flex-col gap-2">
         <Label htmlFor="email">Email</Label>
         <Input

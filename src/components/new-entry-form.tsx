@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ImagePlus, Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -22,6 +22,17 @@ export function NewEntryForm({ challengeId }: { challengeId: string }) {
   const [displayName, setDisplayName] = useState("");
   const [caption, setCaption] = useState("");
   const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    // Prefill from the account's saved name (set at signup) so signed-in
+    // users don't have to retype it on every entry — guests still get a
+    // blank field since they haven't set one.
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      const savedName = user?.user_metadata?.display_name;
+      if (savedName) setDisplayName(savedName);
+    });
+  }, []);
 
   function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
     const selected = event.target.files?.[0] ?? null;
