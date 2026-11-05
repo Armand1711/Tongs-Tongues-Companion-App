@@ -17,18 +17,24 @@ function partsUntil(endsAt: number) {
 
 export function ChallengeCountdown({ endsAt }: { endsAt: string }) {
   const endsAtMs = new Date(endsAt).getTime();
-  const [parts, setParts] = useState(() => partsUntil(endsAtMs));
+  // Empty until mounted: the pre-rendered HTML can't know the visitor's time.
+  const [parts, setParts] = useState<ReturnType<typeof partsUntil> | null>(null);
 
   useEffect(() => {
-    const id = setInterval(() => setParts(partsUntil(endsAtMs)), 1000);
-    return () => clearInterval(id);
+    const tick = () => setParts(partsUntil(endsAtMs));
+    const first = setTimeout(tick, 0);
+    const id = setInterval(tick, 1000);
+    return () => {
+      clearTimeout(first);
+      clearInterval(id);
+    };
   }, [endsAtMs]);
 
   return (
     <div className="flex flex-1 gap-2">
-      <CountdownUnit value={parts.days} label="days" pulse />
-      <CountdownUnit value={parts.hours} label="hrs" />
-      <CountdownUnit value={parts.mins} label="min" />
+      <CountdownUnit value={parts?.days ?? "--"} label="days" pulse />
+      <CountdownUnit value={parts?.hours ?? "--"} label="hrs" />
+      <CountdownUnit value={parts?.mins ?? "--"} label="min" />
     </div>
   );
 }

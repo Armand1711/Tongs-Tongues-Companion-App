@@ -1,33 +1,21 @@
+"use client";
+
 import Link from "next/link";
 import { ScanLine, ArrowRight } from "lucide-react";
-import { createClient } from "@/lib/supabase/server";
-import {
-  getAllCards,
-  getCollectedCardIds,
-  getActiveChallenge,
-  summarizeByLanguage,
-} from "@/lib/supabase/queries";
+import { CHALLENGE } from "@/lib/demo/data";
+import { summarizeByLanguage, useDemoState } from "@/lib/demo/store";
 import { LANGUAGE_ORDER, LANGUAGE_INFO, TOTAL_CARDS } from "@/lib/constants";
 import { LANGUAGE_STYLES } from "@/lib/coasters";
 import { Button } from "@/components/ui/button";
 import { FlameGraphic } from "@/components/flame-graphic";
 
-export default async function HomePage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  const [cards, collectedIds, challenge] = await Promise.all([
-    getAllCards(supabase),
-    user ? getCollectedCardIds(supabase, user.id) : Promise.resolve(new Set<string>()),
-    getActiveChallenge(supabase),
-  ]);
+export default function HomePage() {
+  const { collected } = useDemoState();
 
   const progressByLanguage = new Map(
-    summarizeByLanguage(cards, collectedIds).map((p) => [p.languageCode, p])
+    summarizeByLanguage(collected).map((p) => [p.languageCode, p])
   );
-  const collectedCount = collectedIds.size;
+  const collectedCount = collected.length;
   const progressPct = Math.round((collectedCount / TOTAL_CARDS) * 100);
 
   return (
@@ -42,8 +30,8 @@ export default async function HomePage() {
           </p>
         </div>
         <Link
-          href="/account"
-          aria-label="Account"
+          href="/about"
+          aria-label="About this project"
           className="btn-sticker flex size-[46px] items-center justify-center rounded-full bg-primary transition-transform active:scale-95"
         >
           <span className="font-heading text-xs font-semibold tracking-wide text-primary-foreground">
@@ -51,20 +39,6 @@ export default async function HomePage() {
           </span>
         </Link>
       </header>
-
-      {user?.is_anonymous && (
-        <Link
-          href="/signup"
-          className="btn-sticker flex items-center justify-between gap-3 rounded-2xl bg-card px-4 py-3 transition-transform active:scale-[0.98]"
-        >
-          <p className="text-[13px] font-medium text-foreground">
-            Browsing as a guest —{" "}
-            <span className="text-primary">create an account</span> to save
-            your progress
-          </p>
-          <ArrowRight className="size-4 shrink-0 text-primary" />
-        </Link>
-      )}
 
       <section className="sticker-border relative overflow-hidden rounded-3xl bg-weber-black p-[22px] text-weber-cream">
         <FlameGraphic className="pointer-events-none absolute -right-6 -bottom-10 h-40 w-40 text-white/5" />
@@ -129,23 +103,21 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {challenge && (
-        <Link
-          href="/feed"
-          className="sticker-border relative flex items-center justify-between gap-3 overflow-hidden rounded-[20px] bg-primary p-[18px] text-primary-foreground transition-transform active:scale-[0.98]"
-        >
-          <FlameGraphic className="pointer-events-none absolute -right-4 -top-6 h-28 w-28 text-white/15" />
-          <div className="relative">
-            <p className="text-[11px] uppercase tracking-[0.15em] text-primary-foreground/80">
-              🔥 This Month&apos;s Challenge
-            </p>
-            <p className="mt-1 font-heading text-sm font-semibold">
-              {challenge.theme}
-            </p>
-          </div>
-          <ArrowRight className="relative size-5 shrink-0 text-primary-foreground/80" />
-        </Link>
-      )}
+      <Link
+        href="/feed"
+        className="sticker-border relative flex items-center justify-between gap-3 overflow-hidden rounded-[20px] bg-primary p-[18px] text-primary-foreground transition-transform active:scale-[0.98]"
+      >
+        <FlameGraphic className="pointer-events-none absolute -right-4 -top-6 h-28 w-28 text-white/15" />
+        <div className="relative">
+          <p className="text-[11px] uppercase tracking-[0.15em] text-primary-foreground/80">
+            🔥 This Month&apos;s Challenge
+          </p>
+          <p className="mt-1 font-heading text-sm font-semibold">
+            {CHALLENGE.theme}
+          </p>
+        </div>
+        <ArrowRight className="relative size-5 shrink-0 text-primary-foreground/80" />
+      </Link>
     </div>
   );
 }

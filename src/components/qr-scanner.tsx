@@ -3,9 +3,9 @@
 import { useEffect, useId, useRef, useState } from "react";
 import Image from "next/image";
 import { toast } from "sonner";
-import { CameraOff, RotateCcw } from "lucide-react";
-import { createClient, ensureUser } from "@/lib/supabase/client";
-import { collectCard, getCardById } from "@/lib/supabase/queries";
+import { Camera, CameraOff, RotateCcw } from "lucide-react";
+import { CARDS } from "@/lib/demo/data";
+import { collectCard, getCardById, useDemoState } from "@/lib/demo/store";
 import { Button } from "@/components/ui/button";
 import { LANGUAGE_STYLES } from "@/lib/coasters";
 import { emberBurst } from "@/components/ember-field";
@@ -13,8 +13,9 @@ import type { LanguageCode } from "@/lib/constants";
 import type { Card as CardData } from "@/lib/database.types";
 
 type ScanState =
-  | { status: "scanning" }
+  | { status: "idle" }
   | { status: "starting" }
+  | { status: "scanning" }
   | { status: "camera_error" }
   | { status: "result"; card: CardData; alreadyCollected: boolean };
 
@@ -22,90 +23,94 @@ export function QrScanner() {
   const elementId = useId().replace(/:/g, "-");
   const containerRef = useRef<HTMLDivElement>(null);
   const scannerRef = useRef<import("html5-qrcode").Html5Qrcode | null>(null);
-  const [state, setState] = useState<ScanState>({ status: "starting" });
+  const cameraRunning = useRef(false);
+  const unmounted = useRef(false);
+  const [state, setState] = useState<ScanState>({ status: "idle" });
+  const { collected } = useDemoState();
+  const remainingCards = CARDS.filter((card) => !collected.includes(card.id));
 
   useEffect(() => {
-    let cancelled = false;
+    unmounted.current = false;
+    return () => {
+      unmounted.current = true;
+      if (cameraRunning.current) {
+        cameraRunning.current = false;
+        scannerRef.current?.stop().catch(() => {});
+      }
+    };
+  }, []);
 
-    async function start() {
-      const { Html5Qrcode } = await import("html5-qrcode");
-      if (cancelled || !containerRef.current) return;
+  // Waits for a tap, so visitors aren't asked for camera access just for
+  // opening this tab.
+  async function startCamera() {
+    setState({ status: "starting" });
 
-      const scanner = new Html5Qrcode(elementId);
-      scannerRef.current = scanner;
+    const { Html5Qrcode } = await import("html5-qrcode");
+    if (unmounted.current || !containerRef.current) return;
 
+    const scanner = scannerRef.current ?? new Html5Qrcode(elementId);
+    scannerRef.current = scanner;
+
+    try {
+      await scanner.start(
+        { facingMode: "environment" },
+        { fps: 10, qrbox: { width: 240, height: 240 } },
+        (decodedText) => handleDecoded(decodedText),
+        undefined
+      );
+      if (unmounted.current) {
+        scanner.stop().catch(() => {});
+        return;
+      }
+      cameraRunning.current = true;
+      setState({ status: "scanning" });
+    } catch {
+      if (!unmounted.current) setState({ status: "camera_error" });
+    }
+  }
+
+  function handleDecoded(decodedText: string) {
+    // Ignore further reads until the visitor chooses to scan again: a raw video
+    // feed fires onScanSuccess many times per second.
+    if (cameraRunning.current) {
       try {
-        await scanner.start(
-          { facingMode: "environment" },
-          { fps: 10, qrbox: { width: 240, height: 240 } },
-          (decodedText) => handleDecoded(decodedText),
-          undefined
-        );
-        if (!cancelled) setState({ status: "scanning" });
+        scannerRef.current?.pause(true);
       } catch {
-        if (!cancelled) setState({ status: "camera_error" });
+        // already paused
       }
     }
 
-    start();
-
-    return () => {
-      cancelled = true;
-      scannerRef.current?.stop().catch(() => {});
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [elementId]);
-
-  async function handleDecoded(decodedText: string) {
-    const scanner = scannerRef.current;
-    if (!scanner) return;
-
-    // Ignore further reads until this one resolves and the user chooses
-    // to scan again — a raw video feed fires onScanSuccess many times/sec.
-    try {
-      await scanner.pause(true);
-    } catch {
-      // already paused/stopped
-    }
-
     const code = decodedText.trim().toUpperCase();
-    const supabase = createClient();
-    const user = await ensureUser(supabase);
-
-    if (!user) {
-      toast.error("Couldn't start a session — check your connection and try again.");
-      resumeScanning();
-      return;
-    }
-
-    const card = await getCardById(supabase, code);
+    const card = getCardById(code);
     if (!card) {
       toast.error(`"${code}" isn't a Tongs & Tongues coaster.`);
       resumeScanning();
       return;
     }
 
-    const result = await collectCard(supabase, user.id, code);
+    const result = collectCard(card.id);
 
-    if (result.status === "already_collected") {
+    if (result === "already_collected") {
       toast.info(`Already collected: ${card.word} (${card.item_name})`);
-    } else if (result.status === "collected") {
+    } else {
       toast.success(`Collected! ${card.word} — ${card.item_name}`);
+      emberBurst(45);
     }
 
     setState({
       status: "result",
       card,
-      alreadyCollected: result.status === "already_collected",
+      alreadyCollected: result === "already_collected",
     });
-    if (result.status === "collected") emberBurst(45);
   }
 
   function resumeScanning() {
-    const scanner = scannerRef.current;
-    if (!scanner) return;
-    setState({ status: "scanning" });
-    scanner.resume();
+    if (cameraRunning.current) {
+      setState({ status: "scanning" });
+      scannerRef.current?.resume();
+    } else {
+      setState({ status: "idle" });
+    }
   }
 
   const revealStyle =
@@ -117,6 +122,21 @@ export function QrScanner() {
     <div className="flex flex-col items-center gap-4">
       <div className="sticker-border relative aspect-square w-full max-w-sm overflow-hidden rounded-[28px] bg-weber-black">
         <div id={elementId} ref={containerRef} className="size-full [&_video]:size-full [&_video]:object-cover" />
+
+        {state.status === "idle" && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-weber-black p-6 text-center text-weber-cream">
+            <Camera className="size-8" />
+            <p className="text-sm text-weber-cream/70">
+              Your camera is only used to read the QR code.
+            </p>
+            <Button
+              onClick={startCamera}
+              className="btn-sticker h-12 rounded-2xl bg-primary px-5 font-heading uppercase tracking-wide text-primary-foreground"
+            >
+              Start Camera
+            </Button>
+          </div>
+        )}
 
         {state.status === "scanning" && (
           <>
@@ -148,8 +168,8 @@ export function QrScanner() {
               Camera unavailable
             </p>
             <p className="text-sm text-weber-cream/70">
-              Allow camera access in your browser settings, then reload this
-              page.
+              Allow camera access in your browser settings and reload this page,
+              or try a sample scan below.
             </p>
           </div>
         )}
@@ -158,7 +178,7 @@ export function QrScanner() {
           <div className="absolute inset-0 flex items-center justify-center bg-weber-black/90 p-6">
             <div className="animate-coaster-drop coaster-shape coaster-frame sticker-border relative w-full max-w-[240px] overflow-hidden bg-card text-center">
               {state.card.image_url && (
-                <div className="relative aspect-square w-full">
+                <div className="relative aspect-[4/3] w-full">
                   <Image
                     src={state.card.image_url}
                     alt={state.card.item_name}
@@ -168,7 +188,7 @@ export function QrScanner() {
                   />
                 </div>
               )}
-              <div className="flex flex-col items-center gap-1 p-4">
+              <div className="flex flex-col items-center gap-1 p-3">
                 <span
                   className="rounded-full px-2 py-0.5 font-heading text-[10px] font-semibold text-weber-black"
                   style={{ background: revealStyle.badgeBg }}
@@ -187,7 +207,7 @@ export function QrScanner() {
         )}
       </div>
 
-      {state.status === "result" && (
+      {state.status === "result" ? (
         <div className="flex w-full max-w-sm flex-col items-center gap-3 text-center">
           <p className="text-sm text-muted-foreground">
             {state.alreadyCollected ? (
@@ -208,13 +228,40 @@ export function QrScanner() {
             Scan Next Coaster
           </Button>
         </div>
-      )}
-
-      {state.status !== "result" && (
-        <p className="max-w-sm text-center text-xs text-muted-foreground">
-          Point your camera at the QR code on the coaster to collect it
-          automatically.
-        </p>
+      ) : (
+        <section className="sticker-border flex w-full max-w-sm flex-col gap-3 rounded-2xl bg-card p-4">
+          <h2 className="font-heading text-[13px] uppercase tracking-wide text-foreground">
+            No coaster handy?
+          </h2>
+          {remainingCards.length > 0 ? (
+            <>
+              <p className="text-xs text-muted-foreground">
+                Tap one to try a sample scan.
+              </p>
+              <div className="flex flex-col gap-2">
+                {remainingCards.map((card) => (
+                  <Button
+                    key={card.id}
+                    variant="outline"
+                    disabled={state.status === "starting"}
+                    onClick={() => handleDecoded(card.id)}
+                    className="h-11 justify-between rounded-xl text-[13px] font-semibold"
+                  >
+                    {card.item_name}
+                    <span className="text-[11px] text-muted-foreground">
+                      {card.language}
+                    </span>
+                  </Button>
+                ))}
+              </div>
+            </>
+          ) : (
+            <p className="text-xs text-muted-foreground">
+              You&apos;ve collected all 9 coasters. You can start over from the
+              About page.
+            </p>
+          )}
+        </section>
       )}
     </div>
   );

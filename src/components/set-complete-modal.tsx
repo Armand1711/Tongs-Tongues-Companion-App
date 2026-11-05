@@ -77,7 +77,7 @@ export function SetCompleteModal({
             10% OFF
           </p>
           <p className="mt-1 text-xs text-muted-foreground">
-            at any Weber retailer
+            at any Weber retailer (sample reward)
           </p>
         </div>
       </DialogContent>
