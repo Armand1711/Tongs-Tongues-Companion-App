@@ -1,0 +1,5 @@
+:HL["/Tongs-Tongues-Companion-App/_next/static/chunks/3y484hpwcyhff.css","style"]
+:HL["/Tongs-Tongues-Companion-App/_next/static/media/612bd71aa396cae6-s.p.0y-3ea_6ee5g5.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
+:HL["/Tongs-Tongues-Companion-App/_next/static/media/a343f882a40d2cc9-s.p.0p-wng2nn8o-p.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
+:HL["https://use.typekit.net/wdk6adl.css","style"]
+0:{"tree":{"name":"","param":null,"prefetchHints":16,"slots":{"children":{"name":"feed","param":null,"prefetchHints":0,"slots":{"children":{"name":"id","param":{"type":"d","key":"thandi","siblings":null},"prefetchHints":0,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}}}}}},"staleTime":300,"buildId":"o6gUHICwwwCpaE4hBSnXA"}
