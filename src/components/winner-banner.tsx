@@ -28,7 +28,7 @@ export function WinnerBanner({ code }: { code: string }) {
       }}
     >
       <span className="font-heading text-sm font-semibold">
-        🏆 You won this month&apos;s challenge!
+        🏆 You won last month&apos;s challenge!
       </span>
       <span className="text-xs font-semibold uppercase tracking-wide">
         View →

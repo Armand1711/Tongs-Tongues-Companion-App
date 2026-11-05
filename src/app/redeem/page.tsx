@@ -1,34 +1,25 @@
 import { MapPin, Phone, Clock } from "lucide-react";
-import { createClient } from "@/lib/supabase/server";
-import { getMyLatestVoucher } from "@/lib/supabase/queries";
+import { DEMO_VOUCHER } from "@/lib/demo/data";
 import { RETAILERS } from "@/lib/constants";
 import { PageHeader } from "@/components/page-header";
 
-export default async function RedeemPage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  const voucher = user ? await getMyLatestVoucher(supabase, user.id) : null;
-
+export default function RedeemPage() {
   return (
     <div className="mx-auto flex max-w-md flex-col gap-6 px-4 pt-10">
       <PageHeader
         title="Redeem"
-        subtitle="Show your reward code in-store, or a completed coaster set."
+        subtitle="In the full app, you show your reward code or completed coaster set in-store. The code and store details here are samples."
         watermark
       />
 
-      {voucher && (
-        <div className="sticker-border rounded-2xl bg-weber-black p-4 text-center text-weber-cream">
-          <p className="mb-1.5 text-[11px] uppercase tracking-[0.15em] text-muted-foreground">
-            Active Voucher
-          </p>
-          <p className="font-mono text-lg font-bold tracking-wide text-weber-ember">
-            {voucher.code}
-          </p>
-        </div>
-      )}
+      <div className="sticker-border rounded-2xl bg-weber-black p-4 text-center text-weber-cream">
+        <p className="mb-1.5 text-[11px] uppercase tracking-[0.15em] text-weber-cream/70">
+          Sample Voucher
+        </p>
+        <p className="font-mono text-lg font-bold tracking-wide text-weber-ember">
+          {DEMO_VOUCHER.code}
+        </p>
+      </div>
 
       <div className="flex flex-col gap-3">
         {RETAILERS.map((retailer) => (

@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ImagePlus, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
-import { createClient, ensureUser } from "@/lib/supabase/client";
-import { submitChallengeEntry, uploadBraaiPhoto } from "@/lib/supabase/queries";
+import { withBasePath } from "@/lib/demo/data";
+import { submitEntry } from "@/lib/demo/store";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,36 +14,47 @@ import { Label } from "@/components/ui/label";
 const captionSchema = z.string().max(280, "Keep it under 280 characters.");
 const nameSchema = z.string().max(60, "Keep your name under 60 characters.");
 
-export function NewEntryForm({ challengeId }: { challengeId: string }) {
+const SAMPLE_IMAGE = withBasePath("/demo/winner-tongs.svg");
+const MAX_IMAGE_SIZE = 1000;
+
+// Shrinks the photo so it fits in localStorage, which holds only a few MB.
+async function photoToDataUrl(file: File): Promise<string> {
+  const bitmap = await createImageBitmap(file);
+  const scale = Math.min(1, MAX_IMAGE_SIZE / Math.max(bitmap.width, bitmap.height));
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.round(bitmap.width * scale);
+  canvas.height = Math.round(bitmap.height * scale);
+  canvas.getContext("2d")?.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+  bitmap.close();
+  return canvas.toDataURL("image/jpeg", 0.8);
+}
+
+export function NewEntryForm() {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [file, setFile] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [displayName, setDisplayName] = useState("");
   const [caption, setCaption] = useState("");
-  const [submitting, setSubmitting] = useState(false);
+  const [processing, setProcessing] = useState(false);
 
-  useEffect(() => {
-    // Prefill from the account's saved name (set at signup) so signed-in
-    // users don't have to retype it on every entry — guests still get a
-    // blank field since they haven't set one.
-    const supabase = createClient();
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      const savedName = user?.user_metadata?.display_name;
-      if (savedName) setDisplayName(savedName);
-    });
-  }, []);
+  async function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const selected = event.target.files?.[0];
+    if (!selected) return;
 
-  function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
-    const selected = event.target.files?.[0] ?? null;
-    setFile(selected);
-    setPreviewUrl(selected ? URL.createObjectURL(selected) : null);
+    setProcessing(true);
+    try {
+      setImageUrl(await photoToDataUrl(selected));
+    } catch {
+      toast.error("Couldn't read that image — try a JPG or PNG.");
+    } finally {
+      setProcessing(false);
+    }
   }
 
-  async function handleSubmit(event: React.FormEvent) {
+  function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
 
-    if (!file) {
+    if (!imageUrl) {
       toast.error("Add a photo of your coaster in action first.");
       return;
     }
@@ -59,39 +70,18 @@ export function NewEntryForm({ challengeId }: { challengeId: string }) {
       return;
     }
 
-    setSubmitting(true);
-    try {
-      const supabase = createClient();
-      const user = await ensureUser(supabase);
-
-      if (!user) {
-        toast.error("Couldn't start a session — check your connection and try again.");
-        return;
-      }
-
-      const imageUrl = await uploadBraaiPhoto(supabase, user.id, file);
-      await submitChallengeEntry(
-        supabase,
-        user.id,
-        challengeId,
-        imageUrl,
-        captionResult.data.trim(),
-        nameResult.data.trim()
-      );
-
-      toast.success("Entry submitted!");
-      router.push("/feed");
-      router.refresh();
-    } catch {
-      toast.error("Couldn't submit your entry — try again.");
-    } finally {
-      setSubmitting(false);
-    }
+    submitEntry({
+      imageUrl,
+      caption: captionResult.data.trim(),
+      displayName: nameResult.data.trim(),
+    });
+    toast.success("Entry submitted!");
+    router.push("/feed");
   }
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-      <div>
+      <div className="flex flex-col gap-2">
         <input
           ref={fileInputRef}
           type="file"
@@ -104,20 +94,31 @@ export function NewEntryForm({ challengeId }: { challengeId: string }) {
           onClick={() => fileInputRef.current?.click()}
           className="relative flex aspect-square w-full items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-weber-black/25 bg-card"
         >
-          {previewUrl ? (
-            // local blob: preview URL — next/image's optimizer can't fetch it
+          {imageUrl ? (
+            // Local image data, so there's nothing for next/image to optimize.
             // eslint-disable-next-line @next/next/no-img-element
             <img
-              src={previewUrl}
+              src={imageUrl}
               alt="Selected braai photo"
               className="absolute inset-0 size-full object-cover"
             />
           ) : (
             <div className="flex flex-col items-center gap-2 text-muted-foreground">
-              <ImagePlus className="size-8" />
+              {processing ? (
+                <Loader2 className="size-8 animate-spin" />
+              ) : (
+                <ImagePlus className="size-8" />
+              )}
               <span className="text-sm font-medium">Tap to add photo</span>
             </div>
           )}
+        </button>
+        <button
+          type="button"
+          onClick={() => setImageUrl(SAMPLE_IMAGE)}
+          className="self-center text-xs font-semibold text-primary"
+        >
+          No photo handy? Use a sample image
         </button>
       </div>
 
@@ -145,12 +146,11 @@ export function NewEntryForm({ challengeId }: { challengeId: string }) {
 
       <Button
         type="submit"
-        disabled={submitting}
+        disabled={processing}
         size="lg"
         className="btn-sticker h-14 rounded-2xl bg-primary text-base font-heading uppercase tracking-wide text-primary-foreground"
       >
-        {submitting && <Loader2 className="size-5 animate-spin" />}
-        {submitting ? "Submitting..." : "Submit Entry"}
+        Submit Entry
       </Button>
     </form>
   );

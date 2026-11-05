@@ -54,7 +54,8 @@ export function WinnerReveal({
         </button>
       </div>
       <p className="mb-6 text-xs text-muted-foreground">
-        Redeem 10% off at any participating retailer — see the Redeem tab.
+        In the full app, this code gets 10% off at participating retailers.
+        This sample code can&apos;t be redeemed.
       </p>
 
       <Link

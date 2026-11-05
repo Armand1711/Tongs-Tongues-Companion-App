@@ -1,12 +1,9 @@
-import { notFound } from "next/navigation";
-import Image from "next/image";
-import { MessageCircle } from "lucide-react";
-import { formatDistanceToNow } from "date-fns";
-import { createClient } from "@/lib/supabase/server";
-import { getPostById, getComments, hasUserVoted } from "@/lib/supabase/queries";
-import { VoteButton } from "@/components/vote-button";
-import { CommentForm } from "@/components/comment-form";
-import { PageHeader } from "@/components/page-header";
+import { MY_ENTRY_ID, POSTS } from "@/lib/demo/data";
+import { PostDetail } from "@/components/post-detail";
+
+export function generateStaticParams() {
+  return [...POSTS.map((post) => post.id), MY_ENTRY_ID].map((id) => ({ id }));
+}
 
 export default async function PostDetailPage({
   params,
@@ -14,91 +11,5 @@ export default async function PostDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  const post = await getPostById(supabase, id);
-  if (!post) notFound();
-
-  const [comments, hasVoted] = await Promise.all([
-    getComments(supabase, id),
-    user ? hasUserVoted(supabase, user.id, post.id) : Promise.resolve(false),
-  ]);
-
-  return (
-    <div className="mx-auto flex max-w-md flex-col gap-5 px-4 pt-8">
-      <PageHeader title="Braai Post" back={{ href: "/feed", label: "Challenge" }} />
-
-      <div className="sticker-border overflow-hidden rounded-3xl bg-card">
-        <div className="relative aspect-square w-full bg-muted">
-          <Image
-            src={post.image_url}
-            alt={post.caption ?? "Braai photo"}
-            fill
-            className="object-cover"
-            sizes="(max-width: 448px) 100vw, 448px"
-          />
-        </div>
-
-        <div className="flex items-center gap-3 p-4">
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-semibold text-foreground">
-              {post.display_name || "Braai Fan"}
-            </p>
-            <p className="truncate text-xs text-muted-foreground">
-              {post.caption || "No caption"}
-            </p>
-          </div>
-          <VoteButton
-            postId={post.id}
-            userId={user?.id ?? null}
-            initialVoted={hasVoted}
-            initialVoteCount={post.vote_count}
-            size="lg"
-          />
-        </div>
-      </div>
-
-      <section className="flex flex-col gap-4 pb-8">
-        <h2 className="flex items-center gap-1.5 font-heading text-[13px] uppercase tracking-wide text-foreground">
-          <MessageCircle className="size-4" />
-          Comments ({comments.length})
-        </h2>
-
-        <CommentForm postId={post.id} />
-
-        {comments.length === 0 ? (
-          <p className="rounded-2xl border-2 border-dashed border-weber-black/20 p-6 text-center text-sm text-muted-foreground">
-            No comments yet — be the first to say something.
-          </p>
-        ) : (
-          <ul className="flex flex-col gap-3">
-            {comments.map((comment) => (
-              <li
-                key={comment.id}
-                className="rounded-2xl border-2 border-weber-black/10 bg-card p-3.5"
-              >
-                <div className="mb-1 flex items-baseline justify-between gap-2">
-                  <span className="truncate text-sm font-semibold text-foreground">
-                    {comment.display_name || "Braai Fan"}
-                  </span>
-                  <span className="shrink-0 text-[11px] text-muted-foreground">
-                    {formatDistanceToNow(new Date(comment.created_at), {
-                      addSuffix: true,
-                    })}
-                  </span>
-                </div>
-                <p className="whitespace-pre-wrap text-sm text-foreground/90">
-                  {comment.body}
-                </p>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
-    </div>
-  );
+  return <PostDetail id={id} />;
 }

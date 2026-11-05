@@ -3,6 +3,7 @@ import { Manrope, Permanent_Marker } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { BottomNav } from "@/components/bottom-nav";
+import { DemoBanner } from "@/components/demo-banner";
 import { EmberField } from "@/components/ember-field";
 
 const body = Manrope({
@@ -45,6 +46,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-full flex flex-col bg-background text-foreground">
         <EmberField />
+        <DemoBanner />
         <main className="relative z-10 flex-1 pb-28">{children}</main>
         <BottomNav />
         <Toaster position="top-center" richColors />

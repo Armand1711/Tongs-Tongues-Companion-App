@@ -1,36 +1,28 @@
+"use client";
+
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/server";
-import { getAllCards, getCollectedCardIds } from "@/lib/supabase/queries";
+import { CARDS } from "@/lib/demo/data";
+import { useDemoState } from "@/lib/demo/store";
 import { LANGUAGE_ORDER, LANGUAGE_INFO, TOTAL_CARDS } from "@/lib/constants";
 import { LANGUAGE_STYLES } from "@/lib/coasters";
 import { PageHeader } from "@/components/page-header";
 
-export default async function CollectionPage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  const cards = await getAllCards(supabase);
-  const collectedIds = user
-    ? await getCollectedCardIds(supabase, user.id)
-    : new Set<string>();
-
-  const collectedCount = collectedIds.size;
+export default function CollectionPage() {
+  const { collected } = useDemoState();
 
   return (
     <div className="mx-auto flex max-w-md flex-col gap-6 px-4 pt-10">
       <PageHeader
         title="Coaster Rack"
-        subtitle={`${collectedCount} of ${TOTAL_CARDS} coasters collected`}
+        subtitle={`${collected.length} of ${TOTAL_CARDS} coasters collected`}
         watermark
       />
 
       <div className="flex flex-col gap-3">
         {LANGUAGE_ORDER.map((code) => {
-          const langCards = cards
-            .filter((card) => card.language_code === code)
-            .sort((a, b) => a.item_slug.localeCompare(b.item_slug));
+          const langCards = CARDS.filter((card) => card.language_code === code).sort(
+            (a, b) => a.item_slug.localeCompare(b.item_slug)
+          );
           const style = LANGUAGE_STYLES[code];
 
           return (
@@ -56,7 +48,7 @@ export default async function CollectionPage() {
 
               <div className="flex gap-2">
                 {langCards.map((card) => {
-                  const unlocked = collectedIds.has(card.id);
+                  const unlocked = collected.includes(card.id);
                   return (
                     <div
                       key={card.id}

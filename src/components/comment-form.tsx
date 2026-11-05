@@ -1,12 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { Loader2 } from "lucide-react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
-import { createClient, ensureUser } from "@/lib/supabase/client";
-import { addComment } from "@/lib/supabase/queries";
+import { addComment } from "@/lib/demo/store";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -20,22 +17,10 @@ const bodySchema = z
 const nameSchema = z.string().max(60, "Keep your name under 60 characters.");
 
 export function CommentForm({ postId }: { postId: string }) {
-  const router = useRouter();
   const [displayName, setDisplayName] = useState("");
   const [body, setBody] = useState("");
-  const [submitting, setSubmitting] = useState(false);
 
-  useEffect(() => {
-    // Prefill from the account's saved name (set at signup) — guests still
-    // get a blank field since they haven't set one.
-    const supabase = createClient();
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      const savedName = user?.user_metadata?.display_name;
-      if (savedName) setDisplayName(savedName);
-    });
-  }, []);
-
-  async function handleSubmit(event: React.FormEvent) {
+  function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
 
     const bodyResult = bodySchema.safeParse(body);
@@ -49,25 +34,8 @@ export function CommentForm({ postId }: { postId: string }) {
       return;
     }
 
-    setSubmitting(true);
-    try {
-      const supabase = createClient();
-      const user = await ensureUser(supabase);
-
-      if (!user) {
-        toast.error("Couldn't start a session — check your connection and try again.");
-        return;
-      }
-
-      await addComment(supabase, user.id, postId, nameResult.data.trim(), bodyResult.data);
-
-      setBody("");
-      router.refresh();
-    } catch {
-      toast.error("Couldn't post your comment — try again.");
-    } finally {
-      setSubmitting(false);
-    }
+    addComment(postId, nameResult.data.trim(), bodyResult.data);
+    setBody("");
   }
 
   return (
@@ -97,11 +65,9 @@ export function CommentForm({ postId }: { postId: string }) {
 
       <Button
         type="submit"
-        disabled={submitting}
         className="btn-sticker self-end rounded-xl bg-primary font-heading text-xs font-bold uppercase tracking-wide text-primary-foreground"
       >
-        {submitting && <Loader2 className="size-4 animate-spin" />}
-        {submitting ? "Posting..." : "Post Comment"}
+        Post Comment
       </Button>
     </form>
   );

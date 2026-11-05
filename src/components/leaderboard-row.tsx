@@ -2,17 +2,11 @@ import Link from "next/link";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { VoteButton } from "@/components/vote-button";
-import type { LeaderboardEntry } from "@/lib/supabase/queries";
+import type { LeaderboardEntry } from "@/lib/demo/store";
 
 const RANK_MEDALS = ["🥇", "🥈", "🥉"];
 
-export function LeaderboardRow({
-  entry,
-  userId,
-}: {
-  entry: LeaderboardEntry;
-  userId: string | null;
-}) {
+export function LeaderboardRow({ entry }: { entry: LeaderboardEntry }) {
   const rankLabel =
     entry.rank <= 3 ? RANK_MEDALS[entry.rank - 1] : String(entry.rank);
   const rankColor =
@@ -55,9 +49,8 @@ export function LeaderboardRow({
 
       <VoteButton
         postId={entry.id}
-        userId={userId}
-        initialVoted={entry.hasVoted}
-        initialVoteCount={entry.vote_count}
+        voted={entry.hasVoted}
+        voteCount={entry.vote_count}
       />
     </div>
   );
